@@ -134,8 +134,7 @@ sarebbe completamente vero.
 
 ## Funzionamento
 
-Coreboot è suddiviso in quattro fasi principali: (TODO)
-
+Coreboot è suddiviso in quattro fasi principali:
  * Bootblock
  * Romstage
  * Ramstage
@@ -177,24 +176,26 @@ spegnimento/sospensione non sarà più eseguito codice di Coreboot.
 L'hardware è ora inizializzato ed è giunto il momento che un altro software
 continui con l'avvio del computer.
 I payload più interessanti sono:
- * SeaBIOS<!-- .element: class="fragment" -->
- * Tianocore (UEFI)<!-- .element: class="fragment" -->
- * GRUB<!-- .element: class="fragment" -->
- * Linux<!-- .element: class="fragment" -->
+ * SeaBIOS
+ * Tianocore (UEFI)
+ * GRUB
+ * Linux
 
 --
 
-Ci sono poi anche dei payload "secondari":
- * nvramcui<!-- .element: class="fragment" -->
- * coreinfo<!-- .element: class="fragment" -->
- * Memtest86+<!-- .element: class="fragment" -->
- * Tint (Tint is not tetris)<!-- .element: class="fragment" -->
+Ci sono poi anche dei payload "secondari" che possono essere lanciati dal menu
+interattivo di SeaBIOS o GRUB:
+ * nvramcui
+ * coreinfo
+ * Memtest86+
+ * Tint
+ * GRUB invaders
 
 ---
 
 ## SeaBIOS
 
-<img src="img/seabios.jpg" alt="SeaBIOS" style="height: 14em">
+<img src="img/seabios.png" alt="SeaBIOS" style="height: 17em">
 
 --
 
@@ -207,7 +208,7 @@ Coreboot + SeaBIOS è la soluzione standard, che permette di avere un BIOS
 
 ## Tianocore
 
-<img src="img/tianocore.jpg" alt="SeaBIOS" style="height: 14em">
+<img src="img/tianocore.jpg" alt="SeaBIOS" style="height: 17em">
 
 --
 
@@ -224,14 +225,79 @@ UEFI + BIOS.
 
 ## GRUB
 
-(immagine)
+<img src="img/grub.png" alt="GRUB" style="height: 17em">
 
 --
 
 GRUB non ha bisogno di presentazione, sapete già cos'è.
 
 La cosa che non sapete è che GRUB può essere direttamente lanciato da Coreboot
-senza un BIOS. Questo grazie al fatto che Linux non usa le chiamate BIOS
+senza un BIOS. Questo grazie al fatto che Linux non usa le chiamate BIOS legacy.
+
+--
+
+Rispetto a SeaBIOS abbiamo alcuni vantaggi:
+ * Velocità<!-- .element: class="fragment" -->
+ * Crypto integrata<!-- .element: class="fragment" -->
+  - Aprire volumi LUKS<!-- .element: class="fragment" -->
+  - Verificare kernel/initramfs firmati<!-- .element: class="fragment" -->
+ * Sicurezza<!-- .element: class="fragment" -->
+
+---
+
+## Linux
+
+<img src="img/linux.jpg" alt="Linux" style="height: 17em">
+
+--
+
+Coreboot può lanciare direttamente un kernel linux + initramfs.
+
+IMO, non particolarmente utile: ad ogni aggiornamento del
+kernel/initramfs/opzioni del kernel è necessario riflashare.
+
+Inoltre se sbagliate qualcosa e Linux non si avvia, non ci sono molte opzioni
+disponibili se non riflashare Coreboot con un programmatore esterno.
+
+---
+
+## nvramcui
+
+<img src="img/nvramcui.png" alt="nvramcui" style="height: 15em">
+
+Un'utility per cambiare la configurazione CMOS.
+
+--
+
+## coreinfo
+
+<img src="img/coreinfo.png" alt="coreinfo" style="height: 15em">
+
+Un'utility per vedere varie informazioni di sistema.
+
+--
+
+## Memtest86+
+
+<img src="img/memtest.png" alt="Memtest86+" style="height: 15em">
+
+Un software per controllare lo stato della propria RAM.
+
+--
+
+## TinT (Tint is not Tetris)
+
+<img src="img/tint.png" alt="TinT" style="height: 15em">
+
+TETRIS!!!
+
+--
+
+## GRUB invaders
+
+<img src="img/grub_invaders.jpg" alt="GRUB invaders" style="height: 15em">
+
+Space invaders!!!
 
 ---
 
