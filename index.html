@@ -313,7 +313,136 @@ TODO
 
 --
 
-TODO
+Intel ME è un coprocessore integrato in tutti i processori Intel moderni che
+costituisce l'hardware principale per Intel AMT (Advanced Management
+Technology), una serie di servizi non opzionali:
+ * (elenco servizi inutili)
+
+--
+
+Intel ME ha accesso a:
+ * Tutta la memoria (DMA)
+ * Il bus PCI
+ * Alla GPU
+ * Rete cablata e wireless (con MAC e IP separati)
+
+--
+
+Il firmware (ovviamente un blob non-free) per Intel ME è contenuto nel chip del
+BIOS, ed è firmato con chiave RSA Intel.
+
+Molti dei moduli sono inoltre compressi tramite Huffman, con dizionario
+contenuto in hardware, quindi il loro codice non è accessibile.
+
+--
+
+# Come lo rimuovo?
+
+--
+
+Prima di Nehalem era possibile rimuovere completamente il firmware di ME e il
+PC si avviava correttamente.
+
+Da Nehalem in poi se non viene fornito alcun firmware il PC si accende
+correttamente, ma dopo 30 minuti (controllati tramite timer interno) ME spegne
+forzatamente il PC (probabilmente come misura di sicurezza per evitare il bypass
+di Intel Antitheft).
+
+--
+
+## Risultato
+
+In tutti i PC moderni è installata di fatto una backdoor, non rimovibile, con
+completo accesso a tutte le risorse della macchina, rete inclusa.
+
+Inoltre, grazie al WOL, il sistema non è sicuro nemmeno a PC spento.
+
+---
+
+# Davvero non si può fare nulla?
+
+--
+
+Fortunatamente Igor Skochinsky, un ricercatore indipendente, ha reversato la
+struttura del firmware di Intel ME e l'ha pubblicata qui:
+
+[me.bios.io/ME_blob_format](http://me.bios.io/ME_blob_format)
+
+--
+
+A Settembre 2016 Trammel Hudson ha scoperto che rimuovendo i primi 4 kB dal
+firmware di Intel ME del suo X230 con Coreboot, il PC si avviava correttamente e
+non si spegneva dopo 30 minuti.
+
+Da questa scoperta ha iniziato ad indagare e ha scoperto che è possibile
+rimuovere:
+ * tutte le partizioni meno quella fondamentale
+ * tutti i moduli compressi con LZMA dalla partizione fondamentale
+ 
+--
+
+Pur non avendo rimosso completamente Intel ME questo processo ne ha limitato
+fortemente le capacità in quanto rimuove:
+ * l'accesso di rete (contenuto in una partizione separata, NFTP)<!-- .element: class="fragment" -->
+ * il PAVP (Protected Audio-Video Path)<!-- .element: class="fragment" -->
+ * la JVM<!-- .element: class="fragment" -->
+
+E gli unici moduli rimanenti (in Sandy/Ivy Bridge) sono ROMP, BUP, KERNEL,
+POLICY e FTCS che, secondo l'analisi di Igor Skochinsky, contengono il codice
+relativo all'inizializzazione di base.
+
+--
+
+A Novembre 2016 io e Federico abbiamo iniziato a fare test con Intel ME nel
+tentativo di scoprire quanto codice potevamo rimuovere.
+
+A tal proposito ho scritto uno script Python per rimuovere quanto più codice
+possibile da un firmware ME.
+
+[github.com/corna/me_cleaner](https://github.com/corna/me_cleaner)
+
+--
+
+Abbiamo quindi confermato le scoperte di Trammel Hudson, in particolare che:
+ * Rimuovere i primi 4 kB (ovvero la tabella delle partizioni) fa sì che Intel ME utilizzi una tabella delle partizioni interna<!-- .element: class="fragment" -->
+  - quindi è meglio lasciarla, in modo da poterla modificare (non essendo firmata)<!-- .element: class="fragment" -->
+ * In tutte le generazioni da Sandy Bridge a Skylake è possibile rimuovere tutte le partizioni meno quella fondamentale<!-- .element: class="fragment" -->
+ * In tutte le generazioni da Sandy Bridge a Broadwell è possibile rimuovere tutti i moduli compressi LZMA (circa la metà)<!-- .element: class="fragment" -->
+ * Le modifiche funzionano anche con BIOS OEM<!-- .element: class="fragment" -->
+
+--
+
+Ogni partizione è firmata singolarmente, mentre la tabella delle partizioni non
+è firmata: questo significa che rimuovere completamente le partizioni non
+invalida alcuna firma, ma rimuovere i moduli si.
+
+--
+
+## Allora perchè il sistema parte comunque senza i moduli LZMA (e quindi con una firma non valida)?
+
+--
+
+Tralasciando l'ipotesi che Intel non verifichi la firma (decisamente poco
+probabile), l'ipotesi più probabile è che, per poter accendere il PC, Intel ME
+richiede che la struttura del firmware sia valida, nulla di più.
+
+Questo significa che è probabile che, costruendo un firmware ad-hoc, senza
+codice, con firme non valide ma struttura corretta, il PC si accenda
+correttamente.
+
+--
+
+(schema)
+
+--
+
+### Rimuovere Intel ME è l'ultimo step per poter avere un PC moderno con certificazione RYF (Respects Your Freedom) dalla FSF!
+
+--
+
+Se volete testare lo script sul vostro computer potete seguire questa guida:
+
+[http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
 
 ---
 
