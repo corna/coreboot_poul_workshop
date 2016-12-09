@@ -124,10 +124,10 @@ sarebbe completamente vero.
 
 ## Svantaggi
 
- * Supportato su pochi computer<!-- .element: class="fragment" -->
+ * Supportato da pochi computer<!-- .element: class="fragment" -->
  * Difficile da compilare<!-- .element: class="fragment" -->
  * Difficile da installare<!-- .element: class="fragment" -->
- * Sviluppo e installazione sempre più difficile con le nuove generazioni di processori<!-- .element: class="fragment" -->
+ * Sviluppo e installazione sempre più difficili con le nuove generazioni di processori<!-- .element: class="fragment" -->
   - Intel Boot Guard<!-- .element: class="fragment" -->
 
 --
@@ -147,7 +147,7 @@ Coreboot è suddiviso in quattro fasi principali:
 In questa primissima fase Coreboot:
  * Legge il contenuto della CMOS<!-- .element: class="fragment" -->
  * Decide quale modalità eseguire successivamente<!-- .element: class="fragment" --> (_Normal_ o _Fallback_)
- 
+
 --
 
 ## Romstage
@@ -212,7 +212,7 @@ Coreboot + SeaBIOS è la soluzione standard, che permette di avere un BIOS
 
 --
 
-Tianocore è la reference implementation di UEFI di Intel, rilasciata sotto
+Tianocore è la *reference implementation* di UEFI di Intel, rilasciata sotto
 licenze open.
 
 Duet è uno dei progetti di Tianocore, che permette di avere UEFI con coreboot
@@ -305,7 +305,48 @@ Space invaders!!!
 
 --
 
-TODO
+## Le fasi dell'installazione sono:
+- Preparare l'ambiente di compilazione
+- Fare un dump della BIOS originale
+- Compilare coreboot
+- Flashare l'immagine di coreboot
+
+--
+
+## L'ambiente di compilazione
+[qui](https://www.coreboot.org/Build_HOWTO) ci sono le istruzioni ufficiali,
+ma seguono un ordine discutibile
+
+### Quello che dovrete fare sará:
+- Clonare il repository di coreboot
+```
+$ git clone http://review.coreboot.org/p/coreboot
+$ cd coreboot
+$ git submodule update --init --checkout
+```
+- Compilare il *cross-compilatore*, coreboot per ora gira a 32bit
+```
+make crossgcc-i386 CPUS=4
+```
+- Scegliere le opzioni di compilazione
+```
+make menuconfig
+```
+
+--
+
+## Provatelo con QEMU!
+### É possibile provare coreboot+payload su QEMU prima di passare all'hardware
+Aprite `make menuconfig`
+
+e controllate che nel menu *Mainboard* sia selezionato:
+- vendor: Emulation
+- model: QEMU x86 q35/ich9
+
+Uscite dal menuconfig e usate `make -j4` per compilare
+
+Dovreste trovare un file `coreboot.rom` nella sottocartella `build`
+
 
 ---
 
@@ -378,7 +419,7 @@ Da questa scoperta ha iniziato ad indagare e ha scoperto che è possibile
 rimuovere:
  * tutte le partizioni meno quella fondamentale
  * tutti i moduli compressi con LZMA dalla partizione fondamentale
- 
+
 --
 
 Pur non avendo rimosso completamente Intel ME questo processo ne ha limitato
