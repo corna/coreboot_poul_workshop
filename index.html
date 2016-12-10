@@ -139,7 +139,8 @@ sarebbe completamente vero.
   - "Hackable"<!-- .element: class="fragment" -->
   - Libero da backdoor nel BIOS<!-- .element: class="fragment" -->
  * Molto veloce (0.5/1 s per iniziare a caricare il kernel Linux)<!-- .element: class="fragment" -->
- * Scritto quasi completamente in C<!-- .element: class="fragment" -->
+ * Scritto quasi completamente in C 32-bit<!-- .element: class="fragment" -->
+  - Mentre tutti i BIOS commerciali sono scritti completamente in assembler 16-bit<!-- .element: class="fragment" -->
  * Sviluppato <!-- .element: class="fragment" -->secondo la filosofia "_facciamo il minimo indispensabile, poi togliamoci dai piedi_"
 
 --
@@ -188,6 +189,7 @@ Questa è la fase più critica, in cui Coreboot inizializza la RAM e Intel ME.
 
 In questa fase coreboot inizializza il resto delle periferiche ed esegue il
 codice del payload.
+
 Coreboot ha terminato il suo scopo ed esce di scena: fino allo
 spegnimento/sospensione non sarà più eseguito codice di Coreboot.
 
@@ -197,6 +199,7 @@ spegnimento/sospensione non sarà più eseguito codice di Coreboot.
 
 L'hardware è ora inizializzato ed è giunto il momento che un altro software
 continui con l'avvio del computer.
+
 I payload più interessanti sono:
  * SeaBIOS
  * Tianocore (UEFI)
@@ -260,10 +263,10 @@ senza un BIOS. Questo grazie al fatto che Linux non usa le chiamate BIOS legacy.
 
 Rispetto a SeaBIOS abbiamo alcuni vantaggi:
  * Velocità<!-- .element: class="fragment" -->
+ * Sicurezza<!-- .element: class="fragment" -->
  * Crypto integrata<!-- .element: class="fragment" -->
   - Aprire volumi LUKS<!-- .element: class="fragment" -->
   - Verificare kernel/initramfs firmati<!-- .element: class="fragment" -->
- * Sicurezza<!-- .element: class="fragment" -->
 
 ---
 
@@ -378,16 +381,21 @@ Dovreste trovare un file `coreboot.rom` nella sottocartella `build`
 
 Intel ME è un coprocessore integrato in tutti i processori Intel moderni che
 costituisce l'hardware principale per Intel AMT (Advanced Management
-Technology), una serie di servizi non opzionali:
- * (elenco servizi inutili)
+Technology, componente principale di Intel vPro), una serie di servizi:
+ * controllo remoto<!-- .element: class="fragment" -->
+ * accensione remota<!-- .element: class="fragment" -->
+ * KVM<!-- .element: class="fragment" -->
+ * PAVP per DRM<!-- .element: class="fragment" -->
+ * <!-- .element: class="fragment" -->[...](https://en.wikipedia.org/wiki/Intel_Active_Management_Technology#Features)
 
 --
 
 Intel ME ha accesso a:
- * Tutta la memoria (DMA)
- * Il bus PCI
- * Alla GPU
- * Rete cablata e wireless (con MAC e IP separati)
+ * tutta la memoria<!-- .element: class="fragment" -->
+ * il bus PCI<!-- .element: class="fragment" -->
+ * alla GPU<!-- .element: class="fragment" -->
+ * rete cablata e wireless (con MAC e IP separati)<!-- .element: class="fragment" -->
+ * ...<!-- .element: class="fragment" -->
 
 --
 
@@ -450,10 +458,6 @@ fortemente le capacità in quanto rimuove:
  * il PAVP (Protected Audio-Video Path)<!-- .element: class="fragment" -->
  * la JVM<!-- .element: class="fragment" -->
 
-E gli unici moduli rimanenti (in Sandy/Ivy Bridge) sono ROMP, BUP, KERNEL,
-POLICY e FTCS che, secondo l'analisi di Igor Skochinsky, contengono il codice
-relativo all'inizializzazione di base.
-
 --
 
 A Novembre 2016 io e Federico abbiamo iniziato a fare test con Intel ME nel
@@ -495,17 +499,62 @@ correttamente.
 
 --
 
-(schema)
+### Rimuovere il firmware di Intel ME è l'ultimo step per poter avere un PC moderno con certificazione RYF (Respects Your Freedom) dalla FSF!
+
+---
+
+L'ultima domanda che ci si pone è:
+
+**come faccio ad essere sicuro che Intel ME non abbia una ROM al suo interno con un firmware da usare nel caso quello esterno non sia valido?**
 
 --
 
-### Rimuovere Intel ME è l'ultimo step per poter avere un PC moderno con certificazione RYF (Respects Your Freedom) dalla FSF!
+Fortunatamente il lavoro di Igor Skochinsky ci fornisce la risposta: in alcuni
+firmware di ME è presente una partizione particolare, la **ROMB** (ROM Bypass),
+una partizione contenente il codice da utilizzare al posto di quello nella ROM
+interna.
+
+--
+
+Igor ha analizzato questa partizione di "_update_" e ha scoperto che contiene:
+ * funzioni standard C (memcpy, memset, strcpy...)<!-- .element: class="fragment" -->
+ * routine di ThreadX (il kernel di Intel ME)<!-- .element: class="fragment" -->
+ * API di basso livello per l'accesso all'hardware<!-- .element: class="fragment" -->
+
+--
+
+Lo scopo del codice nella ROM interna è solamente quello di:
+ * inizializzare l'hardware di base<!-- .element: class="fragment" -->
+ * verificare la partizione FTPR<!-- .element: class="fragment" -->
+  - e ora sappiamo che probabilmente non ne controlla la firma, ma solo la struttura<!-- .element: class="fragment" -->
+ * caricare la FTPR e eseguirne il modulo BUP (Bringup)<!-- .element: class="fragment" -->
+
+--
+
+Questa tesi è rafforzata dai documenti "Intel Confidential" accidentalmente
+pubblicati da alcuni produttori, facilmente raggiungibili da Google , che
+confermano che la partizione ROMB può essere eseguita al posto del codice nella
+ROM interna.
+
+_Provate a googlare "loading an ME FW binary image" o "management engine system tools", virgolette incluse._
 
 --
 
 Se volete testare lo script sul vostro computer potete seguire questa guida:
 
 [http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
+
+--
+
+More info:
+
+[Struttura del firmware di Intel ME](http://me.bios.io/ME_blob_format)
+
+[Igor Skochinsky - Rootkit in your laptop - 2012](http://me.bios.io/images/c/ca/Rootkit_in_your_laptop.pdf)
+
+[Igor Skochinsky - Intel ME Secret - 2014](https://recon.cx/2014/slides/Recon%202014%20Skochinsky.pdf)
+
+[Trammel Hudson - Coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-September/082016.html)
 
 ---
 
