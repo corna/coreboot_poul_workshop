@@ -63,7 +63,7 @@
   }
   .reveal section img {
     background: none;
-    border: none;   
+    border: none;
   }
   </style>
 
@@ -328,7 +328,7 @@ Space invaders!!!
 
 # Coreboot: come si installa?
 
---
+---
 
 ## Le fasi dell'installazione sono:
 - Preparare l'ambiente di compilazione
@@ -336,10 +336,10 @@ Space invaders!!!
 - Compilare coreboot
 - Flashare l'immagine di coreboot
 
---
+---
 
 ## L'ambiente di compilazione
-[qui](https://www.coreboot.org/Build_HOWTO) ci sono le istruzioni ufficiali,
+[qui](https://www.coreboot.org/Build_HOWTO) c'é il link alle istruzioni ufficiali,
 ma seguono un ordine discutibile
 
 ### Quello che dovrete fare sará:
@@ -353,7 +353,7 @@ $ git submodule update --init --checkout
 ```
 make crossgcc-i386 CPUS=4
 ```
-- Scegliere le opzioni di compilazione
+- Configurare coreboot
 ```
 make menuconfig
 ```
@@ -362,7 +362,7 @@ make menuconfig
 
 ## Provatelo con QEMU!
 ### É possibile provare coreboot+payload su QEMU prima di passare all'hardware
-Aprite `make menuconfig`
+Lanciate `make menuconfig` per configurare coreboot
 
 e controllate che nel menu *Mainboard* sia selezionato:
 - vendor: Emulation
@@ -372,6 +372,233 @@ Uscite dal menuconfig e usate `make -j4` per compilare
 
 Dovreste trovare un file `coreboot.rom` nella sottocartella `build`
 
+--
+
+### Per compilare un'immagine per il vostro portatile
+vi servirá fare un *dump* della flash originale, per estrarre:
+- Intel Flash Descriptor
+- Firmware Intel ME
+- Firmware Gigabit Ethernet
+- (VBIOS GPU Intel)
+
+--
+
+### Cosa contiene la flash di un PC Intel:
+<img src="img/flash_layout.png" alt="flash" style="height: 10em">
+
+La regione di Intel ME é accessibile __solo da ME stesso__,
+inoltre le BIOS possono essere __protette da scrittura__.
+
+É possibile peró leggere o scrivere l'intera flash
+collegandosi fisicamente al chip.
+
+---
+
+## Dumping the hard way
+
+La flash usa il protocollo __SPI__,
+
+Quindi é possibile leggerne il contenuto utilizzando l'interfaccia SPI
+di un Raspberry Pi o una board equivalente con GPIO a 3.3V.
+
+<img src="img/raspberry1.jpg" alt="raspberry" style="height: 18em">
+
+--
+
+### Trovare la flash
+Il primo passo é trovarla
+<div style="float:left; width:50%">
+  <p> SOIC-8 </p>
+  <img src="img/soic8.jpg" alt="soic8" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+
+  <p> DIP-8 </p>
+  <img src="img/dip8.jpg" alt="dip8" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+</div>
+
+<div style="float:right; width:50%">
+  <p> SOIC-16 </p>
+  <img src="img/soic16.jpg" alt="soic16" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+
+  <p> PLCC-32 </p>
+  <img src="img/plcc32.jpg" alt="plcc32" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+</div>
+
+--
+
+### Pinze!
+
+Cercate il datasheet della flash per trovare il __pinout__
+
+Per collegare il chip potete usare delle
+<div style="float:left; width:50%">
+  <p> testclip SOIC-8</p>
+  <img src="img/testclip.jpg" alt="testclip" style="height: 10em; border: 0; box-shadow: none;">
+</div>
+
+<div style="float:right; width:50%">
+  <p> clip SMD </p>
+  <img src="img/smdclip.jpg" alt="smdclip" style="height: 10em; border: 0; box-shadow: none;">
+</div>
+
+Secondo noi le clip SMD funzionano meglio
+
+--
+
+### Collegare i fili
+Prima di tutto __scollegate alimentazione e batteria dal PC__ 
+<div style="float:left; width:50%">
+  <p> pin del Raspberry Pi</p>
+  <img src="img/pi_pinout.png" alt="pinout" style="height: 11em"></div>
+
+<div style="float:right; width:50%">
+  <p> da collegare in questo ordine</p>
+  <table>
+						<thead>
+							<tr>
+								<th>RPi</th>
+								<th>Flash</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>GND</td>
+								<td>GND</td>
+							</tr>
+							<tr>
+								<td>CS0</td>
+								<td>CS</td>
+							</tr>
+							<tr>
+								<td>SPI0 SCLK</td>
+								<td>CLK</td>
+							</tr>
+              <tr>
+								<td>3.3V PWR</td>
+								<td>3.3V</td>
+							</tr>
+              <tr>
+								<td>SPI0 MISO</td>
+								<td>MISO</td>
+							</tr>
+              <tr>
+								<td>SPI0 MOSI</td>
+								<td>MOSI</td>
+							</tr>
+						</tbody>
+					</table>
+</div>
+
+
+--
+
+### Flashrom
+
+Installate __flashrom__ dal [repo](https://github.com/flashrom/flashrom) github o
+dal vostro package manager
+
+La sintassi per il Raspberry Pi é:
+```
+flashrom -p linux_spi:dev=/dev/spidev0.0 -r dump.bin
+```
+Se flashrom non é sicuro su quale sia il vostro chip vi chiederá
+di specificarlo con l'opzione `-c <chipname>`
+
+Un consiglio é di fare due dump su due file diversi e confrontarli
+con `diff` per essere sicuri di avere un dump valido.
+
+--
+
+### Estrarre i blob
+
+Useremo il programma `ifdtool` presente nella sottocartella `util` della repo
+di coreboot
+
+- Compilate il programma
+```
+cd coreboot/util/ifdtool
+make
+```
+- Estraete le regioni della flash
+```
+mkdir extracted_dump
+cp dump.bin extracted_dump/
+./util/ifdtool/ifdtool -x extracted_dump/dump.bin
+```
+- Troverete nella cartella le sezioni estratte dal dump della flash.
+
+---
+
+## Configurazione
+Coreboot usa una configurazione simile al kernel linux
+
+Usate `make menuconfig` per aprire la configurazione
+e la funzione __help__ se avete dubbi.
+
+Vi mostreró una configurazione standard, sta alla vostra curiositá
+scoprire e provare le varie funzioni (hint: normal/fallback).
+
+--
+
+### Configurare coreboot pt.I
+
+Le cose importanti da scegliere sono:
+- Mainboard
+  - Mainboard vendor: *produttore del vostro pc*
+  - Mainboard model: *il modello del vostro pc*
+  - Rom chip size: *dimensione della vostra flash*
+- Chipset
+  - Include microcode in CBFS: *Generate from tree*
+  - Add Intel descriptor.bin file: *selezionare il path*
+  - Add Intel ME/TXT firmware:     *stessa cosa*
+  - Add gigabit ethernet firmware: *stessa cosa*
+
+--
+
+### Configurare coreboot pt.II
+
+- Devices
+  - Use native graphics initialization: *generalmente funziona*
+  - Enable PCIe Clock Power Management: *buona idea*
+- Display
+  - Keep VESA framebuffer: *modalitá grafica invece di testuale*
+- Generic Drivers
+  - Enable TPM support
+- payload
+  - Add a payload: *SeaBIOS o <a href="#/3/9">quello che preferite</a>*
+  - Secondary Payloads: *vedi* <a href="#/8">*qui*</a>
+
+--
+
+### Compilare
+Per compilare usate `make -jN`
+
+Il risultato sará l'immagine in `coreboot/build/coreboot.rom`
+
+---
+
+## Flashare coreboot
+
+Per flashare la prima volta coreboot serve lo stesso setup del <a href="#/12/3">*dump*</a>
+
+Dalle volte successive é possibile flashare coreboot __da linux__,
+in quanto coreboot non protegge il BIOS / blob ME da scrittura a meno che non lo vogliate.
+
+Il comando per flashare esternamente tramite Raspberry Pi é:
+```
+flashrom -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
+```
+
+--
+
+### force_I_want_a_brick
+
+Quando avete un sistema funzionante, potrete aggiornare coreboot
+da linux tramite il comando:
+```
+flashrom -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
+```
+Dopo aver aggiornato coreboot vi consiglio di __spegnere completamente il PC__
+e riaccenderlo, in modo da caricare la nuova BIOS / blob ME
 
 ---
 
