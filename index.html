@@ -617,6 +617,18 @@ Technology, componente principale di Intel vPro), una serie di servizi:
 
 --
 
+### Intel ME
+
+<div style="float:left; width:50%">
+  <img src="img/intel_structure.jpg" alt="Intel structure" style="height: 12em; box-shadow: none;">
+</div>
+
+<div style="float:right; width:50%">
+  <img src="img/me_structure.jpg" alt="ME structure" style="height: 14em; box-shadow: none;">
+</div>
+
+--
+
 Intel ME ha accesso a:
  * tutta la memoria<!-- .element: class="fragment" -->
  * il bus PCI<!-- .element: class="fragment" -->
@@ -676,6 +688,10 @@ Da questa scoperta ha iniziato ad indagare e ha scoperto che è possibile
 rimuovere:
  * tutte le partizioni meno quella fondamentale
  * tutti i moduli compressi con LZMA dalla partizione fondamentale
+
+--
+
+<img src="img/me_partitions.jpg" alt="ME partitions" style="height: 18em; box-shadow: none;">
 
 --
 
@@ -762,6 +778,12 @@ Questa tesi è rafforzata dai documenti "Intel Confidential" accidentalmente
 pubblicati da alcuni produttori, facilmente raggiungibili da Google , che
 confermano che la partizione ROMB può essere eseguita al posto del codice nella
 ROM interna.
+
+--
+
+<img src="img/romb0.jpg" alt="ROMB" style="height: 6em; box-shadow: none;">
+
+<img src="img/romb1.jpg" alt="ROMB" style="height: 6em; box-shadow: none;">
 
 _Provate a googlare "loading an ME FW binary image" o "management engine system tools", virgolette incluse._
 
