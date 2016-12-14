@@ -39,7 +39,7 @@
   .reveal pre code {
     color: #3f3f3f;
     background: #eee none repeat scroll 0% 0%;
-    font-size: 0.7em;
+    font-size: 1.1em;
     line-height: 1.3em;
     border-radius: .2em;
   }
@@ -126,9 +126,9 @@ sarebbe completamente vero.
 
 ## Perchè Coreboot non è propriamente un BIOS
 
- * Un BIOS inizializza l'hardware e fornisce delle chiamate al sistema in esecuzione<!-- .element: class="fragment" -->
- * Coreboot inizializza solamente l'hardware<!-- .element: class="fragment" -->
-  - Coreboot + SeaBIOS è un BIOS completo<!-- .element: class="fragment" -->
+ * Un BIOS inizializza l'hardware e fornisce delle chiamate al sistema in esecuzione
+ * Coreboot inizializza solamente l'hardware
+  - Coreboot + SeaBIOS è un BIOS completo
 
 --
 
@@ -168,20 +168,20 @@ Coreboot è suddiviso in quattro fasi principali:
 ## Bootblock
 
 In questa primissima fase Coreboot:
- * Legge il contenuto della CMOS<!-- .element: class="fragment" -->
- * Decide quale modalità eseguire successivamente<!-- .element: class="fragment" --> (_Normal_ o _Fallback_)
+ * Legge il contenuto della CMOS
+ * Decide quale modalità eseguire successivamente (_Normal_ o _Fallback_)
 
 --
 
 ## Romstage
 
 Questa è la fase più critica, in cui Coreboot inizializza la RAM e Intel ME.
- * Inizializza le periferiche per il debugging<!-- .element: class="fragment" -->
- * Legge le proprietà del chipset<!-- .element: class="fragment" -->
- * Legge le configurazioni delle RAM dall'SPD o dall'XMP<!-- .element: class="fragment" -->
- * Decide la configurazione migliore e la applica<!-- .element: class="fragment" -->
- * Controlla se la RAM funziona<!-- .element: class="fragment" -->
- * Alloca la memoria richiesta da Intel ME<!-- .element: class="fragment" -->
+ * Inizializza le periferiche per il debugging
+ * Legge le proprietà del chipset
+ * Legge le configurazioni delle RAM dall'SPD o dall'XMP
+ * Decide la configurazione migliore e la applica
+ * Controlla se la RAM funziona
+ * Alloca la memoria richiesta da Intel ME
 
 --
 
@@ -262,11 +262,11 @@ senza un BIOS. Questo grazie al fatto che Linux non usa le chiamate BIOS legacy.
 --
 
 Rispetto a SeaBIOS abbiamo alcuni vantaggi:
- * Velocità<!-- .element: class="fragment" -->
- * Sicurezza<!-- .element: class="fragment" -->
- * Crypto integrata<!-- .element: class="fragment" -->
-  - Aprire volumi LUKS<!-- .element: class="fragment" -->
-  - Verificare kernel/initramfs firmati<!-- .element: class="fragment" -->
+ * Velocità
+ * Sicurezza
+ * Crypto integrata
+  - Aprire volumi LUKS
+  - Verificare kernel/initramfs firmati
 
 ---
 
@@ -276,7 +276,8 @@ Rispetto a SeaBIOS abbiamo alcuni vantaggi:
 
 --
 
-Coreboot può lanciare direttamente un kernel linux + initramfs.
+Coreboot può lanciare direttamente un kernel linux + initramfs contenuto nella
+ROM.
 
 IMO, non particolarmente utile: ad ogni aggiornamento del
 kernel/initramfs/opzioni del kernel è necessario riflashare.
@@ -345,9 +346,8 @@ ma seguono un ordine discutibile
 ### Quello che dovrete fare sará:
 - Clonare il repository di coreboot
 ```
-$ git clone http://review.coreboot.org/p/coreboot
+$ git clone --recursive http://review.coreboot.org/p/coreboot
 $ cd coreboot
-$ git submodule update --init --checkout
 ```
 - Compilare il *cross-compilatore*, coreboot per ora gira a 32bit
 ```
@@ -379,7 +379,7 @@ vi servirá fare un *dump* della flash originale, per estrarre:
 - Intel Flash Descriptor
 - Firmware Intel ME
 - Firmware Gigabit Ethernet
-- (VBIOS GPU Intel)
+- VBIOS GPU Intel (opzionale)
 
 --
 
@@ -401,26 +401,25 @@ La flash usa il protocollo __SPI__,
 Quindi é possibile leggerne il contenuto utilizzando l'interfaccia SPI
 di un Raspberry Pi o una board equivalente con GPIO a 3.3V.
 
-<img src="img/raspberry1.jpg" alt="raspberry" style="height: 18em">
+<img src="img/raspberry1.jpg" alt="raspberry" style="height: 13em">
 
 --
 
 ### Trovare la flash
-Il primo passo é trovarla
 <div style="float:left; width:50%">
   <p> SOIC-8 </p>
-  <img src="img/soic8.jpg" alt="soic8" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+  <img src="img/soic8.jpg" alt="soic8" style="height: 6.5em; border: 0; box-shadow: none; border-radius: 150px;">
 
   <p> DIP-8 </p>
-  <img src="img/dip8.jpg" alt="dip8" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+  <img src="img/dip8.jpg" alt="dip8" style="height: 6.5em; border: 0; box-shadow: none; border-radius: 150px;">
 </div>
 
 <div style="float:right; width:50%">
   <p> SOIC-16 </p>
-  <img src="img/soic16.jpg" alt="soic16" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+  <img src="img/soic16.jpg" alt="soic16" style="height: 6.5em; border: 0; box-shadow: none; border-radius: 150px;">
 
   <p> PLCC-32 </p>
-  <img src="img/plcc32.jpg" alt="plcc32" style="height: 7em; border: 0; box-shadow: none; border-radius: 150px;">
+  <img src="img/plcc32.jpg" alt="plcc32" style="height: 6.5em; border: 0; box-shadow: none; border-radius: 150px;">
 </div>
 
 --
@@ -501,7 +500,8 @@ La sintassi per il Raspberry Pi é:
 flashrom -p linux_spi:dev=/dev/spidev0.0 -r dump.bin
 ```
 Se flashrom non é sicuro su quale sia il vostro chip vi chiederá
-di specificarlo con l'opzione `-c <chipname>`
+di specificarlo con l'opzione `-c <chipname>` (ad esempio, con un X220 dovrete
+usare `-c W25Q64.V`)
 
 Un consiglio é di fare due dump su due file diversi e confrontarli
 con `diff` per essere sicuri di avere un dump valido.
@@ -585,7 +585,7 @@ in quanto coreboot non protegge il BIOS / blob ME da scrittura a meno che non lo
 
 Il comando per flashare esternamente tramite Raspberry Pi é:
 ```
-flashrom -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
+flashrom -c <chipname> -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
 ```
 
 --
@@ -595,7 +595,7 @@ flashrom -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
 Quando avete un sistema funzionante, potrete aggiornare coreboot
 da linux tramite il comando:
 ```
-flashrom -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
+flashrom -c <chipname> -p internal:laptop=force_I_want_a_brick -w coreboot.rom
 ```
 Dopo aver aggiornato coreboot vi consiglio di __spegnere completamente il PC__
 e riaccenderlo, in modo da caricare la nuova BIOS / blob ME
@@ -753,7 +753,7 @@ Igor ha analizzato questa partizione di "_update_" e ha scoperto che contiene:
 Lo scopo del codice nella ROM interna è solamente quello di:
  * inizializzare l'hardware di base<!-- .element: class="fragment" -->
  * verificare la partizione FTPR<!-- .element: class="fragment" -->
-  - e ora sappiamo che probabilmente non ne controlla la firma, ma solo la struttura<!-- .element: class="fragment" -->
+  - e ora sappiamo che l'unica cosa fondamentale è che la struttura sia valida, la firma non è fondamentale<!-- .element: class="fragment" -->
  * caricare la FTPR e eseguirne il modulo BUP (Bringup)<!-- .element: class="fragment" -->
 
 --
@@ -782,6 +782,8 @@ More info:
 [Igor Skochinsky - Intel ME Secret - 2014](https://recon.cx/2014/slides/Recon%202014%20Skochinsky.pdf)
 
 [Trammel Hudson - Coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-September/082016.html)
+
+[Nicola Corna - Coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-November/082331.html)
 
 ---
 
