@@ -368,9 +368,14 @@ e controllate che nel menu *Mainboard* sia selezionato:
 - vendor: Emulation
 - model: QEMU x86 q35/ich9
 
-Uscite dal menuconfig e usate `make -j4` per compilare
+Uscite dal menuconfig e usate `make -jN` per compilare
 
-Dovreste trovare un file `coreboot.rom` nella sottocartella `build`
+Il file `coreboot.rom` nella sottocartella `build` é la vostra immagine
+
+potete lanciare qemu con
+```
+qemu-system-x86_64 -M q35 -bios build/coreboot.rom
+```
 
 --
 
@@ -627,8 +632,12 @@ Necessario per aggiungere il file `grub.cfg` all'immagine nel caso scegliate GRU
 --
 
 ## Approfondimento: cbmem
-Coreboot usa un buffer in memoria per salvare log di avvio e timestamps,
-il comando `cbmem` permette di mostrare i due dati, compilandolo prima con `make`:
+Coreboot usa un buffer in memoria per salvare:
+- log di avvio
+- statistiche sul tempo di avvio (tramite *timestamps*)
+
+Il comando `cbmem` permette di mostrare questi dati,
+compilandolo prima con `make`:
 
 Per mostrare il log
 ```
