@@ -107,8 +107,8 @@ Politecnico Open unix Labs
 
  * <a href="#/5">**Coreboot**</a>
   - <a href="#/6">**Cos'è?**</a>
-  - <a href="#/7">**Come si installa?**</a>
- * <a href="#/8">**Intel ME**</a>
+  - <a href="#/9">**Come si installa?**</a>
+ * <a href="#/15">**Intel ME**</a>
 
 ---
 
@@ -332,10 +332,10 @@ Space invaders!!!
 ---
 
 ## Le fasi dell'installazione sono:
-- Preparare l'ambiente di compilazione
-- Fare un dump della BIOS originale
-- Compilare coreboot
-- Flashare l'immagine di coreboot
+- <a href="#/11">Preparare l'ambiente di compilazione</a>
+- <a href="#/12">Fare un dump della BIOS originale</a>
+- <a href="#/13">Compilare coreboot</a>
+- <a href="#/14">Flashare l'immagine di coreboot</a>
 
 ---
 
@@ -444,7 +444,7 @@ Secondo noi le clip SMD funzionano meglio
 --
 
 ### Collegare i fili
-Prima di tutto __scollegate alimentazione e batteria dal PC__ 
+Prima di tutto __scollegate alimentazione e batteria dal PC__
 <div style="float:left; width:50%">
   <p> pin del Raspberry Pi</p>
   <img src="img/pi_pinout.png" alt="pinout" style="height: 11em"></div>
@@ -500,7 +500,9 @@ La sintassi per il Raspberry Pi é:
 flashrom -p linux_spi:dev=/dev/spidev0.0 -r dump.bin
 ```
 Se flashrom non é sicuro su quale sia il vostro chip vi chiederá
-di specificarlo con l'opzione `-c <chipname>` (ad esempio, con un X220 dovrete
+di specificarlo con l'opzione `-c <chipname>`
+
+(ad esempio, con un X220 dovrete
 usare `-c W25Q64.V`)
 
 Un consiglio é di fare due dump su due file diversi e confrontarli
@@ -524,14 +526,16 @@ mkdir extracted_dump
 cp dump.bin extracted_dump/
 ./util/ifdtool/ifdtool -x extracted_dump/dump.bin
 ```
-- Troverete nella cartella le sezioni estratte dal dump della flash.
+- Troverete nella cartella le sezioni estratte dal dump della flash,
+
+ovvero BIOS, blob ME, blob GbE, Flash Descriptor
 
 ---
 
 ## Configurazione
 Coreboot usa una configurazione simile al kernel linux
 
-Usate `make menuconfig` per aprire la configurazione
+Potete usare `make menuconfig` per aprire la configurazione
 e la funzione __help__ se avete dubbi.
 
 Vi mostreró una configurazione standard, sta alla vostra curiositá
@@ -592,13 +596,49 @@ flashrom -c <chipname> -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
 
 ### force_I_want_a_brick
 
-Quando avete un sistema funzionante, potrete aggiornare coreboot
+Quando avrete un sistema funzionante, potrete aggiornare coreboot
 da linux tramite il comando:
 ```
 flashrom -c <chipname> -p internal:laptop=force_I_want_a_brick -w coreboot.rom
 ```
 Dopo aver aggiornato coreboot vi consiglio di __spegnere completamente il PC__
 e riaccenderlo, in modo da caricare la nuova BIOS / blob ME
+
+---
+
+## Approfondimento: CBFS
+Il BIOS é organizzato come un filesystem in cui sono memorizzati
+romstage, ramstage, blob, payload, configurazioni
+
+Il comando `cbfstool` presente in `coreboot/util` o in `build`
+dopo la compilazione permette di
+
+elencare i file
+```
+./util/cbfstool/cbfstool build/coreboot.rom print
+```
+o modificarli
+```
+./build/cbfstool build/coreboot.rom add -f <file da inserire> -n <nome file> -t raw
+```
+
+Necessario per aggiungere il file `grub.cfg` all'immagine nel caso scegliate GRUB come payload
+
+--
+
+## Approfondimento: cbmem
+Coreboot usa un buffer in memoria per salvare log di avvio e timestamps,
+il comando `cbmem` permette di mostrare i due dati, compilandolo prima con `make`:
+
+Per mostrare il log
+```
+sudo ./util/cbmem -c
+```
+
+Per mostrare il tempo di avvio di sistema
+```
+sudo ./util/cbmem -t
+```
 
 ---
 
