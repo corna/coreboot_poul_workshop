@@ -4,9 +4,9 @@
   <head>
     <meta charset="utf-8">
 
-    <title>Coreboot POuL Workshop</title>
+    <title>coreboot POuL Workshop</title>
 
-    <meta name="description" content="Coreboot POuL Workshop">
+    <meta name="description" content="coreboot POuL Workshop">
     <meta name="author" content="Nicola Corna">
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -94,7 +94,7 @@ NECSTLab
 ---
 
 ## A thanks to Nicola Corna
-### Who introduced me to Coreboot and did the great part of the work on  Intel ME
+### Who introduced me to coreboot and did the great part of the work on  Intel ME
 
 <!-- <div style="float:right; width:50%"> -->
 <img src="img/nicola_corna.jpg" alt="Nicola Corna" style=" border: 0; box-shadow: none; border-radius: 130px;">
@@ -107,30 +107,30 @@ NECSTLab
 
 ## Index
 
- * <a href="#/4">**What is Coreboot?**</a>
+ * <a href="#/4">**What is coreboot?**</a>
  * <a href="#/9">**How do I install it?**</a>
  * <a href="#/15">**Intel ME**</a>
 
 ---
 
-## What is Coreboot?
+## What is coreboot?
 
-__Coreboot__ is a project meant to replace the *proprietary firmware*
+__coreboot__ is a project meant to replace the *proprietary firmware*
 (BIOS or UEFI) present in most computers
 
-We could say that Coreboot is an *open source BIOS*
+We could say that coreboot is an *open source BIOS*
 
 ---
 
-## However Coreboot is not a proper BIOS
+## However coreboot is not a proper BIOS
 
 * A __BIOS__ firmware:
   - performs hardware initialization
   - provides runtime calls for the OS
-* __Coreboot__ does just the hardware initialization
+* __coreboot__ does just the hardware initialization
 
 Modern Windows versions and Linux don't use BIOS calls anymore
-  - You can still run DOS using SeaBIOS on Coreboot
+  - You can still run DOS using SeaBIOS on coreboot
 
 ---
 
@@ -150,7 +150,7 @@ Modern Windows versions and Linux don't use BIOS calls anymore
 ## Downsides
 
  * Few hardware supported<!-- .element: class="fragment" -->
- * Hard to compile<!-- .element: class="fragment" -->
+ * Complex compilation<!-- .element: class="fragment" -->
  * Hard to install<!-- .element: class="fragment" -->
  * New CPU generations make development and installation harder<!-- .element: class="fragment" -->
   - Intel Boot Guard<!-- .element: class="fragment" -->
@@ -159,7 +159,7 @@ Modern Windows versions and Linux don't use BIOS calls anymore
 
 ## How does it work?
 
-Coreboot code is split in four main stages:
+coreboot code is split in four main stages:
  * Bootblock
  * Romstage
  * Ramstage
@@ -169,7 +169,7 @@ Coreboot code is split in four main stages:
 
 ## Bootblock
 
-In this stage Coreboot:
+In this stage coreboot:
  * Reads CMOS configuration
  * Decides in which mode to start (_Normal_ or _Fallback_)
 
@@ -177,21 +177,19 @@ In this stage Coreboot:
 
 ## Romstage
 
-This is the most critical stage, here Coreboot initializes RAM memory and Intel ME.
- * Inizializes debugging peripherals
- * Reads chipset's features
- * Reads memory configuration from SPD or XMP
- * Decides the best configuration and applies it
- * Checks if the RAM is working
+This is the most critical stage, here coreboot initializes RAM memory and Intel ME.
+ * Initializes debugging peripherals
+ * Initializes the chipset
+ * Configures the memory
  * Allocates the shared memory Intel ME requires
 
 ---
 
 ## Ramstage
 
-During this stage Coreboot initializes the remaining peripherals and then jumps into the payload.
+During this stage coreboot initializes the remaining peripherals and then jumps into the payload.
 
-After this stage Coreboot has done its work and won't execute any code until __suspension__ or __shutdown__ happens.
+After this stage coreboot has done its work and won't execute any code until __suspension__ or __shutdown__.
 
 ---
 
@@ -229,8 +227,8 @@ There are also __secondary payloads__ that can be booted:
 
 A complete x86 BIOS implementation.
 
-Coreboot + SeaBIOS provides you a *complete BIOS system*,
-good starting point for a Coreboot setup.
+coreboot + SeaBIOS provides you a *complete BIOS system*,
+good starting point for a coreboot setup.
 
 ---
 
@@ -242,9 +240,9 @@ good starting point for a Coreboot setup.
 
 ## Tianocore
 
-Tianocore is Intel's UEFI *reference implementation*, released under open source license.
+Tianocore is Intel's UEFI *reference implementation*, released under open source licenses.
 
-Duet is part of Tianocore, it should give you *UEFI support on Coreboot*
+Duet is part of Tianocore, it should give you *UEFI support on coreboot*
 
 if you are able to make it work, I failed.
 
@@ -263,10 +261,10 @@ to get an UEFI + BIOS system.
 
 You already know GRUB.
 
-Probably you don't know that GRUB can be run directly from Coreboot, without
+Probably you don't know that GRUB can be run directly from coreboot, without
 a BIOS.
 
-This is due to the fact that Linux does not use BIOS Lecagy calls.
+This is due to the fact that Linux does not use BIOS legacy calls.
 
 ---
 
@@ -274,7 +272,7 @@ This is due to the fact that Linux does not use BIOS Lecagy calls.
 
 It has some advantages with respect to SeaBIOS:
  * Faster
- * With less code
+ * Has less code
  * Built-in crypto
   - Can unlock LUKS volumes
   - Can verify kernel/initramfs signatures
@@ -289,14 +287,14 @@ It has some advantages with respect to SeaBIOS:
 
 ## Linux
 
-Coreboot can boot directly a Linux Kernel from the onboard ROM.
+coreboot can boot directly a Linux Kernel from the onboard ROM.
 
 Has some drawbacks: you need to flash again the ROM each time you want
 to update the kernel or even change the cmdline.
 
 #### It gives you even more flexibility than GRUB,
 
-for example look at the [HEADS bootloader](https://github.com/osresearch/heads)
+For example look at the [HEADS bootloader](https://github.com/osresearch/heads)
 which uses tpm for firmware and filesystem *measurement*.
 
 ---
@@ -341,15 +339,15 @@ Space invaders!!!
 
 ---
 
-## Coreboot: how do I install it?
+# coreboot: how do I install it?
 
 ---
 
 ### The installation is divided into four steps:
 - <a href="#/11">Prepare the building environment</a>
 - <a href="#/12">Dump your original BIOS</a>
-- <a href="#/13">Compile Coreboot</a>
-- <a href="#/14">Flash the Coreboot image</a>
+- <a href="#/13">Compile coreboot</a>
+- <a href="#/14">Flash the coreboot image</a>
 
 ---
 
@@ -358,16 +356,16 @@ Space invaders!!!
 that follows a funny order.
 
 ### What you have to do is:
-- Clone the Coreboot repository
+- Clone the coreboot repository
 ```
 $ git clone --recursive http://review.coreboot.org/p/coreboot
 $ cd coreboot
 ```
-- Compile the *cross-compiler*, Coreboot runs in 32bit mode
+- Compile the *cross-compiler*, coreboot runs in 32bit mode
 ```
 make crossgcc-i386 CPUS=4
 ```
-- Configure Coreboot
+- Configure coreboot
 ```
 make menuconfig
 ```
@@ -375,8 +373,8 @@ make menuconfig
 ---
 
 ## Try it with QEMU!
-### It is possible to try Coreboot+payload on QEMU before messing with the hardware
-Do `make menuconfig` to configure Coreboot
+### It is possible to try coreboot+payload on QEMU before messing with the hardware
+Do `make menuconfig` to configure coreboot
 
 check that the *Mainboard* menu looks like this:
 - vendor: Emulation
@@ -409,7 +407,7 @@ The Intel ME region is accessible __only by ME itself__,
 also, the BIOS region can be __write-protected__.
 
 However it is possible to read or write the entire flash
-by connecting directly to the flash chip.
+by connecting an external programmer to the flash chip.
 
 ---
 
@@ -458,7 +456,7 @@ You can use these to connect the chip
   <img src="img/smdclip.jpg" alt="smdclip" style="height: 10em; border: 0; box-shadow: none;">
 </div>
 
-The SMD clips worked better for us
+I found the SMD clips more reliable
 
 ---
 
@@ -469,7 +467,7 @@ First of all __unplug your charger and remove the battery__
   <img src="img/pi_pinout.png" alt="pinout" style="height: 11em"></div>
 
 <div style="float:right; width:50%">
-  <p>to connect in this order</p>
+  <p>to be connected in this order</p>
   <table>
 						<thead>
 							<tr>
@@ -544,25 +542,25 @@ cp dump.bin extracted_dump/
 ./util/ifdtool/ifdtool -x extracted_dump/dump.bin
 ```
 - You will find the extracted flash regions in the folder:
-  * BIOS,
-  * ME blob,
-  * GbE blob,
+  * BIOS
+  * ME blob
+  * GbE blob
   * Flash Descriptor
 
 ---
 
 ## Configuration
-Coreboot uses a Linux kernel like configuration
+coreboot uses a Linux kernel like configuration
 
 Use `make menuconfig` to open the configuration tool
 and the __help__ button to get a description of the elements.
 
 I will show you a standard configuration, it's up to you to try the other
-functions (hint: normal/fallback)
+settings (hint: normal/fallback)
 
 ---
 
-### Configuring Coreboot pt.I
+### Configuring coreboot pt.I
 
 The main options to set are:
 - Mainboard
@@ -577,7 +575,7 @@ The main options to set are:
 
 ---
 
-### Configuring Coreboot pt.II
+### Configuring coreboot pt.II
 
 - Devices
   - Use native graphics initialization: *usually works*
@@ -599,12 +597,12 @@ The resulting image will be in `coreboot/build/coreboot.rom`
 
 ---
 
-## Flashing Coreboot
+## Flashing coreboot
 
-To flash the first time we need to use the SPI connection, as we did for the <a href="#/34">*dump*</a>
+To flash the image the first time we need to use the SPI connection, as we did for the <a href="#/34">*dump*</a>
 
 From the next time we can flash directly __from linux__
-because in Coreboot the write protection of the BIOS/ME blob is optional
+because in coreboot the write protection of the BIOS/ME blob is optional
 
 The command to flash using a Raspberry Pi is:
 ```
@@ -615,11 +613,11 @@ flashrom -c <chipname> -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
 
 ### force_I_want_a_brick
 
-Once you have booted Linux, you can update Coreboot using:
+Once you have booted Linux, you can update coreboot using:
 ```
 flashrom -c <chipname> -p internal:laptop=force_I_want_a_brick -w coreboot.rom
 ```
-After updating Coreboot, the best thing is to __turn off completely your PC__
+After updating coreboot, the best thing is to __turn off completely your computer__
 in order to run the newly flashed BIOS/ME blob
 
 ---
@@ -646,8 +644,11 @@ Intel AMT is an out-of-band management technology, offering:
 
 ---
 
+### Intel ME
+
 Apart from AMT, in every system ME also does:
 - Platform clock configuration
+- Remote thermal monitoring
 - Silicon Workaround
 
 ---
@@ -677,8 +678,8 @@ Intel ME has access to:
 
 ### The firmware
 
-Its firmware, stored on the flash chip is proprietary, so not security auditable,
-and its signed with RSA 2048 by Intel
+Its firmware is proprietary, so not security auditable, and it's signed with RSA
+by Intel
 
 It's not encrypted but a lot of modules are Huffmann compressed with unknown
 hardware dictionary, so their code cannot be easily accessed.
@@ -694,8 +695,8 @@ Until 1st generation Core CPUs (Nehalem) it was possible to remove the ME
 firmware by modifying the *Intel Flash Descriptor*
 (see [the libreboot page](https://libreboot.org/docs/hcl/gm45_remove_me.html))
 
-From Nehalem onwards if the firmware is removed, the Computer
-turns off after 30 minutes,
+From Nehalem onwards, if the firmware is removed, the Computer
+turns off after 30 minutes;
 probably this is done to avoid the bypass of
 Intel Anti Theft (now discontinued)
 
@@ -710,11 +711,11 @@ Also, ME is active even in S5 power state (computer off)
 
 ---
 
-# Really we can't do nothing?
+# Can't we really do nothing?
 
 ---
 
-### Really we can't do nothing?
+### Can't we really do nothing?
 
 Fortunately Igor Skochinsky, an independent researcher has reverse engineered
 the structure of Intel ME firmware and published it here:
@@ -724,7 +725,7 @@ the structure of Intel ME firmware and published it here:
 ---
 
 In September 2016 Trammell Hudson discovered that wiping the first 4KB of
-Intel ME firmware from his Thinkpad X230 with Coreboot, the Computer
+Intel ME firmware from his Thinkpad X230 with coreboot, the Computer
 would still turn on and won't turn off after 30 minutes.
 
 From this discovery he started digging and found that it is possible to remove:
@@ -861,9 +862,9 @@ Se volete testare lo script sul vostro computer potete seguire questa guida:
 
 [Igor Skochinsky - Intel ME Secrets - 2014](https://recon.cx/2014/slides/Recon%202014%20Skochinsky.pdf)
 
-[Trammel Hudson - Coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-September/082016.html)
+[Trammel Hudson - coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-September/082016.html)
 
-[Nicola Corna - Coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-November/082331.html)
+[Nicola Corna - coreboot Mailing List](https://www.coreboot.org/pipermail/coreboot/2016-November/082331.html)
 
 ---
 
