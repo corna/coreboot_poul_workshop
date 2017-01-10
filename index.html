@@ -711,18 +711,11 @@ Also, ME is active even in S5 power state (computer off)
 
 ---
 
-# Can't we really do nothing?
+# Really we can't do nothing?
 
 ---
 
-### Can't we really do nothing?
-
-Fortunately Igor Skochinsky, an independent researcher has reverse engineered
-the structure of Intel ME firmware and published it here:
-
-[me.bios.io/ME_blob_format](http://me.bios.io/ME_blob_format)
-
----
+### Really we can't do nothing?
 
 In September 2016 Trammell Hudson discovered that wiping the first 4KB of
 Intel ME firmware from his Thinkpad X230 with coreboot, the Computer
@@ -734,9 +727,12 @@ From this discovery he started digging and found that it is possible to remove:
 
 ---
 
+
 <img src="img/me_partitions.jpg" alt="ME partitions" style="height: 18em; box-shadow: none;">
 
 ---
+
+### We can wipe the code
 
 Even not removing completely Intel ME, this process strongly limits its capabilites,
 in fact it removes code for:
@@ -758,19 +754,18 @@ as possible from an Intel ME firmware image.
 
 ---
 
-We confirmed Trammell Hudson's findings, in particular:
- * Removing the first 4KB of the image (the partition table) makes Intel ME use
- an internal one
-  - so we decided to leave it there, as it isn't signed and can be modified
+### Our findings
 
- * In all the generations from Sandy Bridge to Skylake:
-  - all the partitions but the main one can be removed
+We confirmed Trammell Hudson's work, in particular:
 
- * In all the generations from Sandy Bridge to Broadwell:
-  - all the LZMA modules inside the main partition can be removed (half of them)
-  - also all the Huffmann modules but one can be removed
+ * The partition table can be removed (an internal one will be used)
+ * All the partitions can be removed except FTPR (the main one)
+ * All the LZMA modules inside the FTPR can be removed
+ * Also All the Huffmann modules but one (BUP) can be removed.
 
- * These modifications works even with an OEM BIOS<!-- .element: class="fragment" -->
+ #### This way we are left with just 50KB of code (compressed size)
+ * This works on Platforms from Sandy Bridge to Broadwell.
+ * These modifications work even with an OEM BIOS
 
 ---
 
@@ -784,59 +779,59 @@ This means that
 
 ---
 
-## Then why does the system boot even if we remove some modules?
+## Then why the system boots even if we remove some modules?
 
 ---
 
-We have three possibilities:
-- Intel ME runs unsigned code
-- Each module has an extra internal signature
+### We have three possibilities:
 
-probabile), l'ipotesi più probabile è che, per poter accendere il PC, Intel ME
-richiede che la struttura del firmware sia valida, nulla di più.
-
-Questo significa che è probabile che, costruendo un firmware ad-hoc, senza
-codice, con firme non valide ma struttura corretta, il PC si accenda
-correttamente.
+* Either Intel ME is running the code left and
+  - each module has an additional internal signature
+  - we are running unsigned code
+* Or Intel ME is halting before running the code left
 
 ---
 
-### Rimuovere il firmware di Intel ME è l'ultimo step per poter avere un PC moderno con certificazione RYF (Respects Your Freedom) dalla FSF!
+### The last question is:
+
+How can I be sure that Intel ME does not have a backup ROM inside
+with a fallback firmware?
 
 ---
 
-L'ultima domanda che ci si pone è:
+### The ROMB partition
 
-**come faccio ad essere sicuro che Intel ME non abbia una ROM al suo interno con un firmware da usare nel caso quello esterno non sia valido?**
+Luckily the reverse engineering work of Igor Skochinsky answer us:
+Inside some version of ME firmware, there is a special partition called **ROMB**
+(ROM Bypass)
 
----
-
-Fortunatamente il lavoro di Igor Skochinsky ci fornisce la risposta: in alcuni
-firmware di ME è presente una partizione particolare, la **ROMB** (ROM Bypass),
-una partizione contenente il codice da utilizzare al posto di quello nella ROM
-interna.
+This partition contains code that overrides the internal ROM,
+probably used to fix bugs in early silicon.
 
 ---
 
-Igor ha analizzato questa partizione di "_update_" e ha scoperto che contiene:
- * funzioni standard C (memcpy, memset, strcpy...)<!-- .element: class="fragment" -->
- * routine di ThreadX (il kernel di Intel ME)<!-- .element: class="fragment" -->
- * API di basso livello per l'accesso all'hardware<!-- .element: class="fragment" -->
+### The ROMB partition
+
+Igor analized this *update* partition and found out it contains:
+ * Standard C functions (memcpy, memset, strcpy...)<!-- .element: class="fragment" -->
+ * ThreadX routines (Intel ME RTOS kernel)<!-- .element: class="fragment" -->
+ * Low level API for hardware access<!-- .element: class="fragment" -->
 
 ---
 
-Lo scopo del codice nella ROM interna è solamente quello di:
- * inizializzare l'hardware di base<!-- .element: class="fragment" -->
- * verificare la partizione FTPR<!-- .element: class="fragment" -->
-  - e ora sappiamo che l'unica cosa fondamentale è che la struttura sia valida, la firma non è fondamentale<!-- .element: class="fragment" -->
- * caricare la FTPR e eseguirne il modulo BUP (Bringup)<!-- .element: class="fragment" -->
+The purpose of the internal ROM appears to be:
+ * Initialize the base hardware???<!-- .element: class="fragment" -->
+ * Verify the FTPR partition<!-- .element: class="fragment" -->
+  - Now we know that the signature validity is not enforced<!-- .element: class="fragment" -->
+ * Load the FTPR and jump into the BUP (Bringup) module<!-- .element: class="fragment" -->
 
 ---
 
-Questa tesi è rafforzata dai documenti "Intel Confidential" accidentalmente
-pubblicati da alcuni produttori, facilmente raggiungibili da Google , che
-confermano che la partizione ROMB può essere eseguita al posto del codice nella
-ROM interna.
+This thesis is confirmed by "Intel Confidential" documents that you can find
+on Google
+
+They also state that the ROMB partition can be executed instead
+of the internal ROM
 
 ---
 
@@ -844,11 +839,11 @@ ROM interna.
 
 <img src="img/romb1.jpg" alt="ROMB" style="height: 6em; box-shadow: none;">
 
-_Provate a googlare "loading an ME FW binary image" o "management engine system tools", virgolette incluse._
+_Try to google "loading an ME FW binary image" or "management engine system tools", including quotation marks._
 
 ---
 
-Se volete testare lo script sul vostro computer potete seguire questa guida:
+If you want to test `me_cleaner` on your computer, you can follow this guide:
 
 [http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
 
