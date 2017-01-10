@@ -79,142 +79,143 @@
 
 <img src="img/coreboot_logo.svg" alt="coreboot_logo" style="height: 14em; box-shadow: none;">
 
-14 Dicembre 2016<br>
-Politecnico Open unix Labs
+16 Gennaio 2017<br>
+NECSTLab
 
 ---
 
-<div style="float:left; width:50%">
-<img src="img/nicola_corna.jpg" alt="Nicola Corna" style=" border: 0; box-shadow: none; border-radius: 130px;">
-
-<h3><b>Nicola Corna</b></h3>
-<h4> [**nicola@corna.info**](mailto:nicola@corna.info) </h4>
-<h4> [**github.com/corna**](https://github.com/corna)</h4>
-</div>
-
-
-<div style="float:right; width:50%">
+## Me
 <img src="img/federico_izzo.jpg" alt="Federico Amedeo Izzo" style=" border: 0; box-shadow: none; border-radius: 130px;">
 
 <h3><b>Federico Izzo</b></h3>
 <h4> [**federico.izzo42@gmail.com**](mailto:federico.izzo42@gmail.com) </h4>
 <h4> [**github.com/Nimayer**](https://github.com/Nimayer)</h4>
-</div>
 
 ---
 
-# Indice
+## A thanks to Nicola Corna
+### Who introduced me to Coreboot and did the great part of the work on  Intel ME
 
- * <a href="#/5">**Coreboot**</a>
-  - <a href="#/6">**Cos'è?**</a>
-  - <a href="#/9">**Come si installa?**</a>
+<!-- <div style="float:right; width:50%"> -->
+<img src="img/nicola_corna.jpg" alt="Nicola Corna" style=" border: 0; box-shadow: none; border-radius: 130px;">
+
+<h4> [**nicola@corna.info**](mailto:nicola@corna.info) </h4>
+<h4> [**github.com/corna**](https://github.com/corna)</h4>
+<!-- </div> -->
+
+---
+
+## Index
+
+ * <a href="#/4">**What is Coreboot?**</a>
+ * <a href="#/9">**How do I install it?**</a>
  * <a href="#/15">**Intel ME**</a>
 
 ---
 
-# Coreboot: cos'è?
+## What is Coreboot?
 
---
+__Coreboot__ is a project meant to replace the *proprietary firmware*
+(BIOS or UEFI) present in most computers
 
-Coreboot è un progetto volto a sostituire il firmware presente nella maggior
-parte dei computer.
+We could say that Coreboot is an *open source BIOS*
 
-Potremmo dire che Coreboot è un'implementazione di un BIOS libero, ma non
-sarebbe completamente vero.
+---
 
---
+## However Coreboot is not a proper BIOS
 
-## Perchè Coreboot non è propriamente un BIOS
+* A __BIOS__ firmware:
+  - performs hardware initialization
+  - provides runtime calls for the OS
+* __Coreboot__ does just the hardware initialization
 
- * Un BIOS inizializza l'hardware e fornisce delle chiamate al sistema in esecuzione
- * Coreboot inizializza solamente l'hardware
-  - Coreboot + SeaBIOS è un BIOS completo
+Modern Windows versions and Linux don't use BIOS calls anymore
+  - You can still run DOS using SeaBIOS on Coreboot
 
---
+---
 
-## Vantaggi
+## Benefits
 
  * FOSS software<!-- .element: class="fragment" -->
-  - Sicuro<!-- .element: class="fragment" -->
-  - "Hackable"<!-- .element: class="fragment" -->
-  - Libero da backdoor nel BIOS<!-- .element: class="fragment" -->
- * Molto veloce (0.5/1 s per iniziare a caricare il kernel Linux)<!-- .element: class="fragment" -->
- * Scritto quasi completamente in C 32-bit<!-- .element: class="fragment" -->
-  - Mentre tutti i BIOS commerciali sono scritti completamente in assembler 16-bit<!-- .element: class="fragment" -->
- * Sviluppato <!-- .element: class="fragment" -->secondo la filosofia "_facciamo il minimo indispensabile, poi togliamoci dai piedi_"
+  - Safer<!-- .element: class="fragment" -->
+  - Hackable<!-- .element: class="fragment" -->
+  - BIOS backdoor free<!-- .element: class="fragment" -->
+ * Very fast! (0.5/1 s from off to Linux kernel boot)<!-- .element: class="fragment" -->
+ * Written almost completely in 32-bit C language<!-- .element: class="fragment" -->
+  - Unlike commercial BIOSes that are written in 16-bit assembler<!-- .element: class="fragment" -->
+ * Follows <!-- .element: class="fragment" -->the rule "_initialize the hardware, then get out of the way_"
 
---
+---
 
-## Svantaggi
+## Downsides
 
- * Supportato da pochi computer<!-- .element: class="fragment" -->
- * Difficile da compilare<!-- .element: class="fragment" -->
- * Difficile da installare<!-- .element: class="fragment" -->
- * Sviluppo e installazione sempre più difficili con le nuove generazioni di processori<!-- .element: class="fragment" -->
+ * Few hardware supported<!-- .element: class="fragment" -->
+ * Hard to compile<!-- .element: class="fragment" -->
+ * Hard to install<!-- .element: class="fragment" -->
+ * New CPU generations make development and installation harder<!-- .element: class="fragment" -->
   - Intel Boot Guard<!-- .element: class="fragment" -->
 
---
+---
 
-## Funzionamento
+## How does it work?
 
-Coreboot è suddiviso in quattro fasi principali:
+Coreboot code is split in four main stages:
  * Bootblock
  * Romstage
  * Ramstage
  * Payload
 
---
+---
 
 ## Bootblock
 
-In questa primissima fase Coreboot:
- * Legge il contenuto della CMOS
- * Decide quale modalità eseguire successivamente (_Normal_ o _Fallback_)
+In this stage Coreboot:
+ * Reads CMOS configuration
+ * Decides in which mode to start (_Normal_ or _Fallback_)
 
---
+---
 
 ## Romstage
 
-Questa è la fase più critica, in cui Coreboot inizializza la RAM e Intel ME.
- * Inizializza le periferiche per il debugging
- * Legge le proprietà del chipset
- * Legge le configurazioni delle RAM dall'SPD o dall'XMP
- * Decide la configurazione migliore e la applica
- * Controlla se la RAM funziona
- * Alloca la memoria richiesta da Intel ME
+This is the most critical stage, here Coreboot initializes RAM memory and Intel ME.
+ * Inizializes debugging peripherals
+ * Reads chipset's features
+ * Reads memory configuration from SPD or XMP
+ * Decides the best configuration and applies it
+ * Checks if the RAM is working
+ * Allocates the shared memory Intel ME requires
 
---
+---
 
 ## Ramstage
 
-In questa fase coreboot inizializza il resto delle periferiche ed esegue il
-codice del payload.
+During this stage Coreboot initializes the remaining peripherals and then jumps into the payload.
 
-Coreboot ha terminato il suo scopo ed esce di scena: fino allo
-spegnimento/sospensione non sarà più eseguito codice di Coreboot.
+After this stage Coreboot has done its work and won't execute any code until __suspension__ or __shutdown__ happens.
 
---
+---
 
-## Payload
+## Payloads
 
-L'hardware è ora inizializzato ed è giunto il momento che un altro software
-continui con l'avvio del computer.
+Now that the hardware is initialized we can let another software
+continue the boot process.
 
-I payload più interessanti sono:
+The most interesting payloads are:
  * SeaBIOS
  * Tianocore (UEFI)
  * GRUB
  * Linux
 
---
+---
 
-Ci sono poi anche dei payload "secondari" che possono essere lanciati dal menu
-interattivo di SeaBIOS o GRUB:
- * nvramcui
- * coreinfo
- * Memtest86+
- * Tint
- * GRUB invaders
+## Payloads
+
+There are also __secondary payloads__ that can be booted:
+ * nvramcui: *configuration utility*
+ * coreinfo: *information dump*
+ * Memtest86+: *memory test*
+ * Tint: *tetris*
+ * GRUB invaders: *you get the idea*
 
 ---
 
@@ -222,12 +223,14 @@ interattivo di SeaBIOS o GRUB:
 
 <img src="img/seabios.png" alt="SeaBIOS" style="height: 17em">
 
---
+---
 
-Un classico BIOS x86.
+## SeaBIOS
 
-Coreboot + SeaBIOS è la soluzione standard, che permette di avere un BIOS
-"standard".
+A complete x86 BIOS implementation.
+
+Coreboot + SeaBIOS provides you a *complete BIOS system*,
+good starting point for a Coreboot setup.
 
 ---
 
@@ -235,16 +238,18 @@ Coreboot + SeaBIOS è la soluzione standard, che permette di avere un BIOS
 
 <img src="img/tianocore.jpg" alt="SeaBIOS" style="height: 17em">
 
---
+---
 
-Tianocore è la *reference implementation* di UEFI di Intel, rilasciata sotto
-licenze open.
+## Tianocore
 
-Duet è uno dei progetti di Tianocore, che permette di avere UEFI con coreboot
-(se riuscite a farlo funzionare, io non ci riesco).
+Tianocore is Intel's UEFI *reference implementation*, released under open source license.
 
-Tianocore può anche includere SeaBIOS come CSM, in modo da avere un sistema
-UEFI + BIOS.
+Duet is part of Tianocore, it should give you *UEFI support on Coreboot*
+
+if you are able to make it work, I failed.
+
+Tianocore can also include SeaBIOS as CSM,
+to get an UEFI + BIOS system.
 
 ---
 
@@ -252,21 +257,27 @@ UEFI + BIOS.
 
 <img src="img/grub.png" alt="GRUB" style="height: 17em">
 
---
+---
 
-GRUB non ha bisogno di presentazione, sapete già cos'è.
+## GRUB
 
-La cosa che non sapete è che GRUB può essere direttamente lanciato da Coreboot
-senza un BIOS. Questo grazie al fatto che Linux non usa le chiamate BIOS legacy.
+You already know GRUB.
 
---
+Probably you don't know that GRUB can be run directly from Coreboot, without
+a BIOS.
 
-Rispetto a SeaBIOS abbiamo alcuni vantaggi:
- * Velocità
- * Sicurezza
- * Crypto integrata
-  - Aprire volumi LUKS
-  - Verificare kernel/initramfs firmati
+This is due to the fact that Linux does not use BIOS Lecagy calls.
+
+---
+
+## GRUB
+
+It has some advantages with respect to SeaBIOS:
+ * Faster
+ * With less code
+ * Built-in crypto
+  - Can unlock LUKS volumes
+  - Can verify kernel/initramfs signatures
 
 ---
 
@@ -274,16 +285,19 @@ Rispetto a SeaBIOS abbiamo alcuni vantaggi:
 
 <img src="img/linux.jpg" alt="Linux" style="height: 17em">
 
---
+---
 
-Coreboot può lanciare direttamente un kernel linux + initramfs contenuto nella
-ROM.
+## Linux
 
-IMO, non particolarmente utile: ad ogni aggiornamento del
-kernel/initramfs/opzioni del kernel è necessario riflashare.
+Coreboot can boot directly a Linux Kernel from the onboard ROM.
 
-Inoltre se sbagliate qualcosa e Linux non si avvia, non ci sono molte opzioni
-disponibili se non riflashare Coreboot con un programmatore esterno.
+Has some drawbacks: you need to flash again the ROM each time you want
+to update the kernel or even change the cmdline.
+
+#### It gives you even more flexibility than GRUB,
+
+for example look at the [HEADS bootloader](https://github.com/osresearch/heads)
+which uses tpm for firmware and filesystem *measurement*.
 
 ---
 
@@ -291,25 +305,25 @@ disponibili se non riflashare Coreboot con un programmatore esterno.
 
 <img src="img/nvramcui.png" alt="nvramcui" style="height: 15em">
 
-Un'utility per cambiare la configurazione CMOS.
+An utility to change CMOS configuration.
 
---
+---
 
 ## coreinfo
 
 <img src="img/coreinfo.png" alt="coreinfo" style="height: 15em">
 
-Un'utility per vedere varie informazioni di sistema.
+An utility to view system info.
 
---
+---
 
 ## Memtest86+
 
 <img src="img/memtest.png" alt="Memtest86+" style="height: 15em">
 
-Un software per controllare lo stato della propria RAM.
+A tool to check the RAM health.
 
---
+---
 
 ## TinT (Tint is not Tetris)
 
@@ -317,7 +331,7 @@ Un software per controllare lo stato della propria RAM.
 
 TETRIS!!!
 
---
+---
 
 ## GRUB invaders
 
@@ -327,90 +341,90 @@ Space invaders!!!
 
 ---
 
-# Coreboot: come si installa?
+## Coreboot: how do I install it?
 
 ---
 
-## Le fasi dell'installazione sono:
-- <a href="#/11">Preparare l'ambiente di compilazione</a>
-- <a href="#/12">Fare un dump della BIOS originale</a>
-- <a href="#/13">Compilare coreboot</a>
-- <a href="#/14">Flashare l'immagine di coreboot</a>
+### The installation is divided into four steps:
+- <a href="#/11">Prepare the building environment</a>
+- <a href="#/12">Dump your original BIOS</a>
+- <a href="#/13">Compile Coreboot</a>
+- <a href="#/14">Flash the Coreboot image</a>
 
 ---
 
-## L'ambiente di compilazione
-[qui](https://www.coreboot.org/Build_HOWTO) c'é il link alle istruzioni ufficiali,
-ma seguono un ordine discutibile
+## The building environment
+[here](https://www.coreboot.org/Build_HOWTO) you can find the official guide,
+that follows a funny order.
 
-### Quello che dovrete fare sará:
-- Clonare il repository di coreboot
+### What you have to do is:
+- Clone the Coreboot repository
 ```
 $ git clone --recursive http://review.coreboot.org/p/coreboot
 $ cd coreboot
 ```
-- Compilare il *cross-compilatore*, coreboot per ora gira a 32bit
+- Compile the *cross-compiler*, Coreboot runs in 32bit mode
 ```
 make crossgcc-i386 CPUS=4
 ```
-- Configurare coreboot
+- Configure Coreboot
 ```
 make menuconfig
 ```
 
---
+---
 
-## Provatelo con QEMU!
-### É possibile provare coreboot+payload su QEMU prima di passare all'hardware
-Lanciate `make menuconfig` per configurare coreboot
+## Try it with QEMU!
+### It is possible to try Coreboot+payload on QEMU before messing with the hardware
+Do `make menuconfig` to configure Coreboot
 
-e controllate che nel menu *Mainboard* sia selezionato:
+check that the *Mainboard* menu looks like this:
 - vendor: Emulation
 - model: QEMU x86 q35/ich9
 
-Uscite dal menuconfig e usate `make -jN` per compilare
+Leave the menuconfig and do `make -jN` to compile
 
-Il file `coreboot.rom` nella sottocartella `build` é la vostra immagine
+The `coreboot.rom` file inside the `build` subfolder is your image
 
-potete lanciare qemu con
+You can run QEMU using
 ```
 qemu-system-x86_64 -M q35 -bios build/coreboot.rom
 ```
 
---
+---
 
-### Per compilare un'immagine per il vostro portatile
-vi servirá fare un *dump* della flash originale, per estrarre:
+### To build an image for your laptop
+you will need a *dump* of the flash content, to extract:
 - Intel Flash Descriptor
-- Firmware Intel ME
-- Firmware Gigabit Ethernet
-- VBIOS GPU Intel (opzionale)
+- Intel ME Firmware
+- Gigabit Ethernet Firmware
+- Intel GPU VBIOS (optional)
 
---
+---
 
-### Cosa contiene la flash di un PC Intel:
+### What there is inside an Intel PC flash:
 <img src="img/flash_layout.png" alt="flash" style="height: 10em">
 
-La regione di Intel ME é accessibile __solo da ME stesso__,
-inoltre le BIOS possono essere __protette da scrittura__.
+The Intel ME region is accessible __only by ME itself__,
+also, the BIOS region can be __write-protected__.
 
-É possibile peró leggere o scrivere l'intera flash
-collegandosi fisicamente al chip.
+However it is possible to read or write the entire flash
+by connecting directly to the flash chip.
 
 ---
 
 ## Dumping the hard way
 
-La flash usa il protocollo __SPI__,
+The flash chip uses the __SPI__ protocol,
 
-Quindi é possibile leggerne il contenuto utilizzando l'interfaccia SPI
-di un Raspberry Pi o una board equivalente con GPIO a 3.3V.
+So we can read its content using the SPI interface of a Raspberry Pi or
+a similar board with 3.3V GPIO
 
 <img src="img/raspberry1.jpg" alt="raspberry" style="height: 13em">
 
---
+---
 
-### Trovare la flash
+### Find the flash
 <div style="float:left; width:50%">
   <p> SOIC-8 </p>
   <img src="img/soic8.jpg" alt="soic8" style="height: 6.5em; border: 0; box-shadow: none; border-radius: 150px;">
@@ -427,35 +441,35 @@ di un Raspberry Pi o una board equivalente con GPIO a 3.3V.
   <img src="img/plcc32.jpg" alt="plcc32" style="height: 6.5em; border: 0; box-shadow: none; border-radius: 150px;">
 </div>
 
---
+---
 
-### Pinze!
+### Clips!
 
-Cercate il datasheet della flash per trovare il __pinout__
+You can find the flash chip __pinout__ inside its datasheet
 
-Per collegare il chip potete usare delle
+You can use these to connect the chip
 <div style="float:left; width:50%">
-  <p> testclip SOIC-8</p>
+  <p>SOIC-8 testclip</p>
   <img src="img/testclip.jpg" alt="testclip" style="height: 10em; border: 0; box-shadow: none;">
 </div>
 
 <div style="float:right; width:50%">
-  <p> clip SMD </p>
+  <p>SMD clips</p>
   <img src="img/smdclip.jpg" alt="smdclip" style="height: 10em; border: 0; box-shadow: none;">
 </div>
 
-Secondo noi le clip SMD funzionano meglio
+The SMD clips worked better for us
 
---
+---
 
-### Collegare i fili
-Prima di tutto __scollegate alimentazione e batteria dal PC__
+### Connect the wires
+First of all __unplug your charger and remove the battery__
 <div style="float:left; width:50%">
-  <p> pin del Raspberry Pi</p>
+  <p>Raspberry Pi pins</p>
   <img src="img/pi_pinout.png" alt="pinout" style="height: 11em"></div>
 
 <div style="float:right; width:50%">
-  <p> da collegare in questo ordine</p>
+  <p>to connect in this order</p>
   <table>
 						<thead>
 							<tr>
@@ -493,178 +507,150 @@ Prima di tutto __scollegate alimentazione e batteria dal PC__
 </div>
 
 
---
+---
 
 ### Flashrom
 
-Installate __flashrom__ dal [repo](https://github.com/flashrom/flashrom) github o
-dal vostro package manager
+Compile __flashrom__ from the [github repo](https://github.com/flashrom/flashrom)
+or install it from your package manager
 
-La sintassi per il Raspberry Pi é:
+The Raspberry Pi command is:
 ```
 flashrom -p linux_spi:dev=/dev/spidev0.0 -r dump.bin
 ```
-Se flashrom non é sicuro su quale sia il vostro chip vi chiederá
-di specificarlo con l'opzione `-c <chipname>`
+Flashrom may ask you to specify your chip model if he cannot detect it
+automatically, you can use the option `-c <chipname>`
 
-(ad esempio, con un X220 dovrete
-usare `-c W25Q64.V`)
+(e.g. on a Thinkpad X220 the option would be `-c W25Q64.V`)
 
-Un consiglio é di fare due dump su due file diversi e confrontarli
-con `diff` per essere sicuri di avere un dump valido.
+A good practice is to make two dumps and compare the results (using `diff`)
+to be more safe
 
---
+---
 
-### Estrarre i blob
+### Extract the blobs
 
-Useremo il programma `ifdtool` presente nella sottocartella `util` della repo
-di coreboot
+The utility `ifdtool` included in the coreboot tree can be used to extract our dump
 
-- Compilate il programma
+- Compile the utility
 ```
 cd coreboot/util/ifdtool
 make
 ```
-- Estraete le regioni della flash
+- Extract the flash regions
 ```
 mkdir extracted_dump
 cp dump.bin extracted_dump/
 ./util/ifdtool/ifdtool -x extracted_dump/dump.bin
 ```
-- Troverete nella cartella le sezioni estratte dal dump della flash,
-
-ovvero BIOS, blob ME, blob GbE, Flash Descriptor
+- You will find the extracted flash regions in the folder:
+  * BIOS,
+  * ME blob,
+  * GbE blob,
+  * Flash Descriptor
 
 ---
 
-## Configurazione
-Coreboot usa una configurazione simile al kernel linux
+## Configuration
+Coreboot uses a Linux kernel like configuration
 
-Potete usare `make menuconfig` per aprire la configurazione
-e la funzione __help__ se avete dubbi.
+Use `make menuconfig` to open the configuration tool
+and the __help__ button to get a description of the elements.
 
-Vi mostreró una configurazione standard, sta alla vostra curiositá
-scoprire e provare le varie funzioni (hint: normal/fallback).
+I will show you a standard configuration, it's up to you to try the other
+functions (hint: normal/fallback)
 
---
+---
 
-### Configurare coreboot pt.I
+### Configuring Coreboot pt.I
 
-Le cose importanti da scegliere sono:
+The main options to set are:
 - Mainboard
-  - Mainboard vendor: *produttore del vostro pc*
-  - Mainboard model: *il modello del vostro pc*
-  - Rom chip size: *dimensione della vostra flash*
+  - Mainboard vendor: *your computer brand*
+  - Mainboard model: *your computer model*
+  - Rom chip size: *the flash chip size*
 - Chipset
   - Include microcode in CBFS: *Generate from tree*
-  - Add Intel descriptor.bin file: *selezionare il path*
-  - Add Intel ME/TXT firmware:     *stessa cosa*
-  - Add gigabit ethernet firmware: *stessa cosa*
-
---
-
-### Configurare coreboot pt.II
-
-- Devices
-  - Use native graphics initialization: *generalmente funziona*
-  - Enable PCIe Clock Power Management: *buona idea*
-- Display
-  - Keep VESA framebuffer: *modalitá grafica invece di testuale*
-- Generic Drivers
-  - Enable TPM support
-- payload
-  - Add a payload: *SeaBIOS o <a href="#/3/9">quello che preferite</a>*
-  - Secondary Payloads: *vedi* <a href="#/8">*qui*</a>
-
---
-
-### Compilare
-Per compilare usate `make -jN`
-
-Il risultato sará l'immagine in `coreboot/build/coreboot.rom`
+  - Add Intel descriptor.bin file: *we extracted it before*
+  - Add Intel ME/TXT firmware:     *same thing*
+  - Add gigabit ethernet firmware: *same thing*
 
 ---
 
-## Flashare coreboot
+### Configuring Coreboot pt.II
 
-Per flashare la prima volta coreboot serve lo stesso setup del <a href="#/12/3">*dump*</a>
+- Devices
+  - Use native graphics initialization: *usually works*
+  - Enable PCIe Clock Power Management: *good idea*
+- Display
+  - Keep VESA framebuffer: *graphical mode instead of text*
+- Generic Drivers
+  - Enable TPM support
+- Payload
+  - Add a payload: *SeaBIOS or <a href="#/12">one of your choice</a>*
+  - Secondary Payloads: *see* <a href="#/13">*here*</a>
 
-Dalle volte successive é possibile flashare coreboot __da linux__,
-in quanto coreboot non protegge il BIOS / blob ME da scrittura a meno che non lo vogliate.
+---
 
-Il comando per flashare esternamente tramite Raspberry Pi é:
+### Compiling
+To compile run `make -jN`
+
+The resulting image will be in `coreboot/build/coreboot.rom`
+
+---
+
+## Flashing Coreboot
+
+To flash the first time we need to use the SPI connection, as we did for the <a href="#/34">*dump*</a>
+
+From the next time we can flash directly __from linux__
+because in Coreboot the write protection of the BIOS/ME blob is optional
+
+The command to flash using a Raspberry Pi is:
 ```
 flashrom -c <chipname> -p linux_spi:dev=/dev/spidev0.0 -w coreboot.rom
 ```
 
---
+---
 
 ### force_I_want_a_brick
 
-Quando avrete un sistema funzionante, potrete aggiornare coreboot
-da linux tramite il comando:
+Once you have booted Linux, you can update Coreboot using:
 ```
 flashrom -c <chipname> -p internal:laptop=force_I_want_a_brick -w coreboot.rom
 ```
-Dopo aver aggiornato coreboot vi consiglio di __spegnere completamente il PC__
-e riaccenderlo, in modo da caricare la nuova BIOS / blob ME
-
----
-
-## Approfondimento: CBFS
-Il BIOS é organizzato come un filesystem in cui sono memorizzati
-romstage, ramstage, blob, payload, configurazioni
-
-Il comando `cbfstool` presente in `coreboot/util` o in `build`
-dopo la compilazione permette di
-
-elencare i file
-```
-./util/cbfstool/cbfstool build/coreboot.rom print
-```
-o modificarli
-```
-./build/cbfstool build/coreboot.rom add -f <file da inserire> -n <nome file> -t raw
-```
-
-Necessario per aggiungere il file `grub.cfg` all'immagine nel caso scegliate GRUB come payload
-
---
-
-## Approfondimento: cbmem
-Coreboot usa un buffer in memoria per salvare:
-- log di avvio
-- statistiche sul tempo di avvio (tramite *timestamps*)
-
-Il comando `cbmem` permette di mostrare questi dati,
-compilandolo prima con `make`:
-
-Per mostrare il log
-```
-sudo ./util/cbmem -c
-```
-
-Per mostrare il tempo di avvio di sistema
-```
-sudo ./util/cbmem -t
-```
+After updating Coreboot, the best thing is to __turn off completely your PC__
+in order to run the newly flashed BIOS/ME blob
 
 ---
 
 # Intel ME
 
---
+---
 
-Intel ME è un coprocessore integrato in tutti i processori Intel moderni che
-costituisce l'hardware principale per Intel AMT (Advanced Management
-Technology, componente principale di Intel vPro), una serie di servizi:
- * controllo remoto<!-- .element: class="fragment" -->
- * accensione remota<!-- .element: class="fragment" -->
- * KVM<!-- .element: class="fragment" -->
- * PAVP per DRM<!-- .element: class="fragment" -->
- * <!-- .element: class="fragment" -->[...](https://en.wikipedia.org/wiki/Intel_Active_Management_Technology#Features)
+## Intel ME
 
---
+Intel Management Engine is a __secondary processor__ integrated in all Intel motherboard chipsets
+from 2008 onwards.
+
+It is mainly used for Intel AMT (Advanced Management
+Technology) on CPUs with vPRO enabled.
+
+Intel AMT is an out-of-band management technology, offering:
+ * network tunnel over untrusted network<!-- .element: class="fragment" -->
+ * remote power control<!-- .element: class="fragment" -->
+ * remote KVM<!-- .element: class="fragment" -->
+ * network packet filter<!-- .element: class="fragment" -->
+ * PAVP for DRM media<!-- .element: class="fragment" -->
+ * <!-- .element: class="fragment" -->[more ...](https://en.wikipedia.org/wiki/Intel_Active_Management_Technology#Features)
+
+---
+
+Apart from AMT, in every system ME also does:
+- Platform clock configuration
+- Silicon Workaround
+
+---
 
 ### Intel ME
 
@@ -676,112 +662,135 @@ Technology, componente principale di Intel vPro), una serie di servizi:
   <img src="img/me_structure.jpg" alt="ME structure" style="height: 14em; box-shadow: none;">
 </div>
 
---
+---
 
-Intel ME ha accesso a:
- * tutta la memoria<!-- .element: class="fragment" -->
- * il bus PCI<!-- .element: class="fragment" -->
- * alla GPU<!-- .element: class="fragment" -->
- * rete cablata e wireless (con MAC e IP separati)<!-- .element: class="fragment" -->
- * ...<!-- .element: class="fragment" -->
+### ME capabilities
 
---
-
-Il firmware (ovviamente un blob non-free) per Intel ME è contenuto nel chip del
-BIOS, ed è firmato con chiave RSA Intel.
-
-Molti dei moduli sono inoltre compressi tramite Huffman, con dizionario
-contenuto in hardware, quindi il loro codice non è accessibile.
-
---
-
-# Come lo rimuovo?
-
---
-
-Prima di Nehalem era possibile rimuovere completamente il firmware di ME e il
-PC si avviava correttamente.
-
-Da Nehalem in poi se non viene fornito alcun firmware il PC si accende
-correttamente, ma dopo 30 minuti (controllati tramite timer interno) ME spegne
-forzatamente il PC (probabilmente come misura di sicurezza per evitare il bypass
-di Intel Antitheft).
-
---
-
-## Risultato
-
-In tutti i PC moderni è installata di fatto una backdoor, non rimovibile, con
-completo accesso a tutte le risorse della macchina, rete inclusa.
-
-Inoltre, grazie al WOL, il sistema non è sicuro nemmeno a PC spento.
+Intel ME has access to:
+ * Any memory region<!-- .element: class="fragment" -->
+ * The PCI bus<!-- .element: class="fragment" -->
+ * The GPU<!-- .element: class="fragment" -->
+ * Wired and wireless NIC (with dedicated MAC address)<!-- .element: class="fragment" -->
+ * more ...<!-- .element: class="fragment" -->
 
 ---
 
-# Davvero non si può fare nulla?
+### The firmware
 
---
+Its firmware, stored on the flash chip is proprietary, so not security auditable,
+and its signed with RSA 2048 by Intel
 
-Fortunatamente Igor Skochinsky, un ricercatore indipendente, ha reversato la
-struttura del firmware di Intel ME e l'ha pubblicata qui:
+It's not encrypted but a lot of modules are Huffmann compressed with unknown
+hardware dictionary, so their code cannot be easily accessed.
+
+---
+
+# How do I disable it?
+
+---
+
+### How do I disable it?
+Until 1st generation Core CPUs (Nehalem) it was possible to remove the ME
+firmware by modifying the *Intel Flash Descriptor*
+(see [the libreboot page](https://libreboot.org/docs/hcl/gm45_remove_me.html))
+
+From Nehalem onwards if the firmware is removed, the Computer
+turns off after 30 minutes,
+probably this is done to avoid the bypass of
+Intel Anti Theft (now discontinued)
+
+---
+
+## Result
+
+In all modern Intel computers we have a perfect backdoor framework included,
+not removable, and with complete access to all the machine resources.
+
+Also, ME is active even in S5 power state (computer off)
+
+---
+
+# Really we can't do nothing?
+
+---
+
+### Really we can't do nothing?
+
+Fortunately Igor Skochinsky, an independent researcher has reverse engineered
+the structure of Intel ME firmware and published it here:
 
 [me.bios.io/ME_blob_format](http://me.bios.io/ME_blob_format)
 
---
+---
 
-A Settembre 2016 Trammel Hudson ha scoperto che rimuovendo i primi 4 kB dal
-firmware di Intel ME del suo X230 con Coreboot, il PC si avviava correttamente e
-non si spegneva dopo 30 minuti.
+In September 2016 Trammell Hudson discovered that wiping the first 4KB of
+Intel ME firmware from his Thinkpad X230 with Coreboot, the Computer
+would still turn on and won't turn off after 30 minutes.
 
-Da questa scoperta ha iniziato ad indagare e ha scoperto che è possibile
-rimuovere:
- * tutte le partizioni meno quella fondamentale
- * tutti i moduli compressi con LZMA dalla partizione fondamentale
+From this discovery he started digging and found that it is possible to remove:
+ * All the partitions but the main one
+ * All the LZMA compressed modules from the main partition
 
---
+---
 
 <img src="img/me_partitions.jpg" alt="ME partitions" style="height: 18em; box-shadow: none;">
 
---
+---
 
-Pur non avendo rimosso completamente Intel ME questo processo ne ha limitato
-fortemente le capacità in quanto rimuove:
- * l'accesso di rete (contenuto in una partizione separata, NFTP)<!-- .element: class="fragment" -->
- * il PAVP (Protected Audio-Video Path)<!-- .element: class="fragment" -->
- * la JVM<!-- .element: class="fragment" -->
+Even not removing completely Intel ME, this process strongly limits its capabilites,
+in fact it removes code for:
+ * Network access (contained in the removed NFTP partition)<!-- .element: class="fragment" -->
+ * PAVP (Protected Audio-Video Path)<!-- .element: class="fragment" -->
+ * The JVM (meant to enable the use of DRM applets)<!-- .element: class="fragment" -->
 
---
+---
 
-A Novembre 2016 io e Federico abbiamo iniziato a fare test con Intel ME nel
-tentativo di scoprire quanto codice potevamo rimuovere.
+### me_cleaner.py
 
-A tal proposito ho scritto uno script Python per rimuovere quanto più codice
-possibile da un firmware ME.
+In November 2016, Me and Nicola began testing with Intel ME to replicate
+Hudson's results and see how much more code we could remove.
+
+To aid this purpose, Nicola wrote a python script to remove as much code
+as possible from an Intel ME firmware image.
 
 [github.com/corna/me_cleaner](https://github.com/corna/me_cleaner)
 
---
+---
 
-Abbiamo quindi confermato le scoperte di Trammel Hudson, in particolare che:
- * Rimuovere i primi 4 kB (ovvero la tabella delle partizioni) fa sì che Intel ME utilizzi una tabella delle partizioni interna<!-- .element: class="fragment" -->
-  - quindi è meglio lasciarla, in modo da poterla modificare (non essendo firmata)<!-- .element: class="fragment" -->
- * In tutte le generazioni da Sandy Bridge a Skylake è possibile rimuovere tutte le partizioni meno quella fondamentale<!-- .element: class="fragment" -->
- * In tutte le generazioni da Sandy Bridge a Broadwell è possibile rimuovere tutti i moduli compressi LZMA (circa la metà)<!-- .element: class="fragment" -->
- * Le modifiche funzionano anche con BIOS OEM<!-- .element: class="fragment" -->
+We confirmed Trammell Hudson's findings, in particular:
+ * Removing the first 4KB of the image (the partition table) makes Intel ME use
+ an internal one
+  - so we decided to leave it there, as it isn't signed and can be modified
 
---
+ * In all the generations from Sandy Bridge to Skylake:
+  - all the partitions but the main one can be removed
 
-Ogni partizione è firmata singolarmente, mentre la tabella delle partizioni non
-è firmata: questo significa che rimuovere completamente le partizioni non
-invalida alcuna firma, ma rimuovere i moduli si.
+ * In all the generations from Sandy Bridge to Broadwell:
+  - all the LZMA modules inside the main partition can be removed (half of them)
+  - also all the Huffmann modules but one can be removed
 
---
+ * These modifications works even with an OEM BIOS<!-- .element: class="fragment" -->
 
-## Allora perchè il sistema parte comunque senza i moduli LZMA (e quindi con una firma non valida)?
+---
 
---
+### Signatures
 
-Tralasciando l'ipotesi che Intel non verifichi la firma (decisamente poco
+Every partition is signed separately, while the partition table isn't signed:
+
+This means that
+- removing whole partitions *does not break a signature*,
+- but removing modules from a partition *does*.
+
+---
+
+## Then why does the system boot even if we remove some modules?
+
+---
+
+We have three possibilities:
+- Intel ME runs unsigned code
+- Each module has an extra internal signature
+
 probabile), l'ipotesi più probabile è che, per poter accendere il PC, Intel ME
 richiede che la struttura del firmware sia valida, nulla di più.
 
@@ -789,7 +798,7 @@ Questo significa che è probabile che, costruendo un firmware ad-hoc, senza
 codice, con firme non valide ma struttura corretta, il PC si accenda
 correttamente.
 
---
+---
 
 ### Rimuovere il firmware di Intel ME è l'ultimo step per poter avere un PC moderno con certificazione RYF (Respects Your Freedom) dalla FSF!
 
@@ -799,21 +808,21 @@ L'ultima domanda che ci si pone è:
 
 **come faccio ad essere sicuro che Intel ME non abbia una ROM al suo interno con un firmware da usare nel caso quello esterno non sia valido?**
 
---
+---
 
 Fortunatamente il lavoro di Igor Skochinsky ci fornisce la risposta: in alcuni
 firmware di ME è presente una partizione particolare, la **ROMB** (ROM Bypass),
 una partizione contenente il codice da utilizzare al posto di quello nella ROM
 interna.
 
---
+---
 
 Igor ha analizzato questa partizione di "_update_" e ha scoperto che contiene:
  * funzioni standard C (memcpy, memset, strcpy...)<!-- .element: class="fragment" -->
  * routine di ThreadX (il kernel di Intel ME)<!-- .element: class="fragment" -->
  * API di basso livello per l'accesso all'hardware<!-- .element: class="fragment" -->
 
---
+---
 
 Lo scopo del codice nella ROM interna è solamente quello di:
  * inizializzare l'hardware di base<!-- .element: class="fragment" -->
@@ -821,14 +830,14 @@ Lo scopo del codice nella ROM interna è solamente quello di:
   - e ora sappiamo che l'unica cosa fondamentale è che la struttura sia valida, la firma non è fondamentale<!-- .element: class="fragment" -->
  * caricare la FTPR e eseguirne il modulo BUP (Bringup)<!-- .element: class="fragment" -->
 
---
+---
 
 Questa tesi è rafforzata dai documenti "Intel Confidential" accidentalmente
 pubblicati da alcuni produttori, facilmente raggiungibili da Google , che
 confermano che la partizione ROMB può essere eseguita al posto del codice nella
 ROM interna.
 
---
+---
 
 <img src="img/romb0.jpg" alt="ROMB" style="height: 6em; box-shadow: none;">
 
@@ -836,13 +845,13 @@ ROM interna.
 
 _Provate a googlare "loading an ME FW binary image" o "management engine system tools", virgolette incluse._
 
---
+---
 
 Se volete testare lo script sul vostro computer potete seguire questa guida:
 
 [http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
 
---
+---
 
 ## More info:
 
@@ -882,12 +891,12 @@ Attribution-ShareAlike 3.0 Unported
     // Full list of configuration options available at:
     // https://github.com/hakimel/reveal.js#configuration
     Reveal.initialize({
-      controls: true,
+      controls: false,
       progress: true,
       history: true,
       center: true,
 
-      transition: 'slide', // none/fade/slide/convex/concave/zoom
+      transition: 'none', // none/fade/slide/convex/concave/zoom
 
       // Optional reveal.js plugins
       dependencies: [
