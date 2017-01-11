@@ -108,8 +108,8 @@ NECSTLab
 ## Index
 
  * <a href="#/4">**What is coreboot?**</a>
- * <a href="#/9">**How do I install it?**</a>
- * <a href="#/15">**Intel ME**</a>
+ * <a href="#/28">**How do I install it?**</a>
+ * <a href="#/46">**Intel ME**</a>
 
 ---
 
@@ -344,10 +344,10 @@ Space invaders!!!
 ---
 
 ### The installation is divided into four steps:
-- <a href="#/11">Prepare the building environment</a>
-- <a href="#/12">Dump your original BIOS</a>
-- <a href="#/13">Compile coreboot</a>
-- <a href="#/14">Flash the coreboot image</a>
+- <a href="#/30">Prepare the building environment</a>
+- <a href="#/34">Dump your original BIOS</a>
+- <a href="#/40">Compile coreboot</a>
+- <a href="#/44">Flash the coreboot image</a>
 
 ---
 
@@ -634,7 +634,7 @@ from 2008 onwards.
 It is mainly used for Intel AMT (Advanced Management
 Technology) on CPUs with vPRO enabled.
 
-Intel AMT is an out-of-band management technology, offering:
+Intel AMT is an *out-of-band* management technology, offering:
  * network tunnel over untrusted network<!-- .element: class="fragment" -->
  * remote power control<!-- .element: class="fragment" -->
  * remote KVM<!-- .element: class="fragment" -->
@@ -646,22 +646,13 @@ Intel AMT is an out-of-band management technology, offering:
 
 ### Intel ME
 
-Apart from AMT, in every system ME also does:
-- Platform clock configuration
-- Remote thermal monitoring
-- Silicon Workaround
+<img src="img/me_structure.jpg" alt="ME structure" style="height: 19em; box-shadow: none;">
 
 ---
 
 ### Intel ME
 
-<div style="float:left; width:50%">
-  <img src="img/intel_structure.jpg" alt="Intel structure" style="height: 12em; box-shadow: none;">
-</div>
-
-<div style="float:right; width:50%">
-  <img src="img/me_structure.jpg" alt="ME structure" style="height: 14em; box-shadow: none;">
-</div>
+<img src="img/me_arch.png" alt="ME structure" style="height: 19em; box-shadow: none;">
 
 ---
 
@@ -719,7 +710,7 @@ Also, ME is active even in S5 power state (computer off)
 
 In September 2016 Trammell Hudson discovered that wiping the first 4KB of
 Intel ME firmware from his Thinkpad X230 with coreboot, the Computer
-would still turn on and won't turn off after 30 minutes.
+would still turn on and won't shut down after 30 minutes.
 
 From this discovery he started digging and found that it is possible to remove:
  * All the partitions but the main one
@@ -769,7 +760,20 @@ We confirmed Trammell Hudson's work, in particular:
 
 ---
 
-### Signatures
+### Drawbacks?
+
+Removing the code appears to hang Intel ME
+
+But apart from AMT, there are more things ME can do in a system:
+- Platform clock configuration
+- Remote thermal monitoring
+- Silicon Workaround
+
+__We found no substantial bugs appearing so far__
+
+---
+
+### Wasn't it signed?
 
 Every partition is signed separately, while the partition table isn't signed:
 
@@ -783,11 +787,11 @@ This means that
 
 ---
 
-### We have three possibilities:
+### We have three hypothesis:
 
 * Either Intel ME is running the code left and
   - each module has an additional internal signature
-  - we are running unsigned code
+  - or we are running unsigned code
 * Or Intel ME is halting before running the code left
 
 ---
@@ -802,7 +806,7 @@ with a fallback firmware?
 ### The ROMB partition
 
 Luckily the reverse engineering work of Igor Skochinsky answer us:
-Inside some version of ME firmware, there is a special partition called **ROMB**
+Inside some versions of ME firmware, there is a special partition called **ROMB**
 (ROM Bypass)
 
 This partition contains code that overrides the internal ROM,
@@ -812,46 +816,55 @@ probably used to fix bugs in early silicon.
 
 ### The ROMB partition
 
-Igor analized this *update* partition and found out it contains:
- * Standard C functions (memcpy, memset, strcpy...)<!-- .element: class="fragment" -->
- * ThreadX routines (Intel ME RTOS kernel)<!-- .element: class="fragment" -->
- * Low level API for hardware access<!-- .element: class="fragment" -->
+Igor analized this *update partition* and found out it contains:
+ * Common C functions (memcpy, memset, strcpy...)<!-- .element: class="fragment" -->
+ * ThreadX routines (Intel ME RTOS)<!-- .element: class="fragment" -->
+ * Low level hardware access API<!-- .element: class="fragment" -->
 
 ---
 
-The purpose of the internal ROM appears to be:
- * Initialize the base hardware???<!-- .element: class="fragment" -->
- * Verify the FTPR partition<!-- .element: class="fragment" -->
-  - Now we know that the signature validity is not enforced<!-- .element: class="fragment" -->
- * Load the FTPR and jump into the BUP (Bringup) module<!-- .element: class="fragment" -->
+### The ROMB partition
+
+The internal ROM appears to:
+ * Do basic hardware init<!-- .element: class="fragment" -->
+ * Check the FTPR partition signature<!-- .element: class="fragment" -->
+ * Load the BUP module and jumps to it<!-- .element: class="fragment" -->
 
 ---
 
-This thesis is confirmed by "Intel Confidential" documents that you can find
+Proof of this can be found inside "Intel Confidential" documents that you can find
 on Google
 
-They also state that the ROMB partition can be executed instead
-of the internal ROM
+<img src="img/romb0.jpg" alt="ROMB" style="height: 8em; box-shadow: none;">
+
+Try to google *"loading an ME FW binary image"* or *"management engine system tools"*, including quotation marks.
 
 ---
 
-<img src="img/romb0.jpg" alt="ROMB" style="height: 6em; box-shadow: none;">
+### Final notes
 
-<img src="img/romb1.jpg" alt="ROMB" style="height: 6em; box-shadow: none;">
+If you want to test `me_cleaner` on your computer,
+* You can find a guide [here](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
+* And here there are [more details](https://github.com/corna/me_cleaner/wiki/How-does-it-work%3F)
 
-_Try to google "loading an ME FW binary image" or "management engine system tools", including quotation marks._
+Here is a rough compatibility table
 
----
+|Gen|with vPRO|without vPRO|
+|---|---|---|
+|Core2|OK<sup>1</sup>|OK<sup>1</sup>|
+|Nehalem|WIP|WIP|
+|Sandy - Ivy Bridge|OK<sup>2</sup>|OK<sup>2</sup>|
+|Haswell - Skylake|NO|OK<sup>3</sup>|
 
-If you want to test `me_cleaner` on your computer, you can follow this guide:
-
-[http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
+<small><sup>1</sup> See this [libreboot page](https://libreboot.org/docs/hcl/gm45_remove_me.html) (no code)</small>
+<small><sup>2</sup> Only BUP module left (~50KB)</small>
+<small><sup>3</sup> Only FTPR partition left (~668KB)</small>
 
 ---
 
 ## More info:
 
-[Struttura del firmware di Intel ME](http://me.bios.io/ME_blob_format)
+[Intel ME Firmware Structure](http://me.bios.io/ME_blob_format)
 
 [Igor Skochinsky - Rootkit in your laptop - 2012](http://me.bios.io/images/c/ca/Rootkit_in_your_laptop.pdf)
 
