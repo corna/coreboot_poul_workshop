@@ -855,6 +855,10 @@ If you want to test `me_cleaner` on your computer,
 * You can find a guide [here](http://hardenedlinux.org/firmware/2016/11/17/neutralize_ME_firmware_on_sandybridge_and_ivybridge.html)
 * And here there are [more details](https://github.com/corna/me_cleaner/wiki/How-does-it-work%3F)
 
+---
+
+### Final notes
+
 Here is a rough compatibility table
 
 |Gen|with vPRO|without vPRO|
@@ -862,10 +866,12 @@ Here is a rough compatibility table
 |Core2|OK<sup>1</sup>|OK<sup>1</sup>|
 |Nehalem|WIP|WIP|
 |Sandy - Ivy Bridge|OK<sup>2</sup>|OK<sup>2</sup>|
-|Haswell - Skylake|NO|OK<sup>3</sup>|
+|Haswell - Broadwell|NO|OK<sup>2</sup>|
+|Skylake|NO|OK<sup>3</sup>|
 
-<small><sup>1</sup> See this [libreboot page](https://libreboot.org/docs/hcl/gm45_remove_me.html) (no code)</small>
-<small><sup>2</sup> Only BUP module left (~50KB)</small>
+
+<small><sup>1</sup> See this [libreboot page](https://libreboot.org/docs/hcl/gm45_remove_me.html) (no code left)</small><br>
+<small><sup>2</sup> Only BUP module left (~50KB)</small><br>
 <small><sup>3</sup> Only FTPR partition left (~668KB)</small>
 
 ---
