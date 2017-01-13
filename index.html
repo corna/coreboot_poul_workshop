@@ -652,7 +652,7 @@ Intel AMT is an *out-of-band* management technology, offering:
 
 ### Intel ME
 
-<img src="img/me_arch.png" alt="ME structure" style="height: 19em; box-shadow: none;">
+<img src="img/me_arch_transparent_2.png" alt="ME structure" style="height: 19em; box-shadow: none;">
 
 ---
 
@@ -773,26 +773,32 @@ __We found no substantial bugs appearing so far__
 
 ---
 
-### Wasn't it signed?
+### Signatures
 
-Every partition is signed separately, while the partition table isn't signed:
+The code is __signed at partition level__:
+- removing an entire partition *doesn't break a signature*,
+- but removing modules from a partition *should break it*.
 
-This means that
-- removing whole partitions *does not break a signature*,
-- but removing modules from a partition *does*.
-
----
-
-## Then why the system boots even if we remove some modules?
+__Then why the system boots even if we remove some modules?__
 
 ---
 
-### We have three hypothesis:
+### The signatures are working like this:
 
-* Either Intel ME is running the code left and
-  - each module has an additional internal signature
-  - or we are running unsigned code
-* Or Intel ME is halting before running the code left
+<img src="img/ME_partition_structure.svg" alt="ME partitions" style="height: 18em; box-shadow: none;">
+
+---
+
+### The signatures are working like this:
+
+The *modules manifest list* signature is valid because it contains the
+old hashes (we don't modify them).
+
+But those hashes are broken __because we removed the code__.
+
+Apparently the hash check is done before executing each module.
+
+So we __can not run unsigned code__, but we can boot the system.
 
 ---
 
