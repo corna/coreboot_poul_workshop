@@ -353,7 +353,7 @@ Space invaders!!!
 
 ## The building environment
 [here](https://www.coreboot.org/Build_HOWTO) you can find the official guide,
-that follows a funny order.
+that follows a questionable order.
 
 ### What you have to do is:
 - Clone the coreboot repository
@@ -688,25 +688,25 @@ firmware by modifying the *Intel Flash Descriptor*
 
 From Nehalem onwards, if the firmware is removed, the Computer
 turns off after 30 minutes;
-probably this is done to avoid the bypass of
-Intel Anti Theft (now discontinued)
+this is probably done to avoid the bypass of
+Intel Anti-Theft (now discontinued)
 
 ---
 
 ## Result
 
-In all modern Intel computers we have a perfect backdoor framework included,
+__In all modern Intel computers we have a perfect backdoor framework__,
 not removable, and with complete access to all the machine resources.
 
 Also, ME is active even in S5 power state (computer off)
 
 ---
 
-# Really we can't do nothing?
+# Is there anything that we can do?
 
 ---
 
-### Really we can't do nothing?
+### Is there anything that we can do?
 
 In September 2016 Trammell Hudson discovered that wiping the first 4KB of
 Intel ME firmware from his Thinkpad X230 with coreboot, the Computer
@@ -735,7 +735,7 @@ in fact it removes code for:
 
 ### me_cleaner.py
 
-In November 2016, Me and Nicola began testing with Intel ME to replicate
+In November 2016, me and Nicola began testing with Intel ME to replicate
 Hudson's results and see how much more code we could remove.
 
 To aid this purpose, Nicola wrote a python script to remove as much code
@@ -752,7 +752,7 @@ We confirmed Trammell Hudson's work, in particular:
  * The partition table can be removed (an internal one will be used)
  * All the partitions can be removed except FTPR (the main one)
  * All the LZMA modules inside the FTPR can be removed
- * Also All the Huffmann modules but one (BUP) can be removed.
+ * Also all the Huffmann modules but one (BUP) can be removed.
 
  #### This way we are left with just 50KB of code (compressed size)
  * This works on Platforms from Sandy Bridge to Broadwell.
@@ -769,7 +769,7 @@ But apart from AMT, there are more things ME can do in a system:
 - Remote thermal monitoring
 - Silicon Workaround
 
-__We found no substantial bugs appearing so far__
+__Until now ~30 `me_cleaner` users reported no bugs__.
 
 ---
 
@@ -783,15 +783,17 @@ __Then why the system boots even if we remove some modules?__
 
 ---
 
-### The signatures are working like this:
+### The signatures work like this:
 
 <img src="img/ME_partition_structure.svg" alt="ME partitions" style="height: 18em; box-shadow: none;">
 
 ---
 
-### The signatures are working like this:
+### The signatures work like this:
 
-The *modules manifest list* signature is valid because it contains the
+Partition header *-sign->* manifest list *-hash->* manifest
+
+The *module manifest list* signature is valid because it contains the
 old hashes (we don't modify them).
 
 But those hashes are broken __because we removed the code__.
@@ -816,7 +818,7 @@ Inside some versions of ME firmware, there is a special partition called **ROMB*
 (ROM Bypass)
 
 This partition contains code that overrides the internal ROM,
-probably used to fix bugs in early silicon.
+ used to fix bugs in early silicon.
 
 ---
 
